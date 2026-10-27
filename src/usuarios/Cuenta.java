@@ -13,8 +13,8 @@ public class Cuenta {
         this.movimientos = movimientos;
     }
     
-    public void recargar(double monto,String medio){
-       Movimiento movimiento = new Movimiento(LocalDateTime.now(),monto,TipoMovimiento.RECARGA,medio);
+    public void recargar(double monto,String concepto){
+       Movimiento movimiento = new Movimiento(LocalDateTime.now(),monto,TipoMovimiento.RECARGA,concepto);
        this.saldo += monto;
        this.movimientos.add(movimiento);  
     }

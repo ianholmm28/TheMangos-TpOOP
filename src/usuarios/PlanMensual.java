@@ -6,7 +6,8 @@ public class PlanMensual {
     
     private YearMonth mes;
     private int viajesUsados;
-    private final int VIAJES_INCLUIDOS = 20;
+    static final double COSTO_PLAN  = 15000;
+    static final int VIAJES_INCLUIDOS = 20;
 
     public YearMonth getMes() {
         return mes;
@@ -16,6 +17,11 @@ public class PlanMensual {
         return VIAJES_INCLUIDOS;
     }
 
+    public double getCOSTO_PLAN() {
+        return COSTO_PLAN;
+    }
+
+    
     public PlanMensual(YearMonth mes) {
         this.mes = mes;
         this.viajesUsados = 0 ;
