@@ -1,4 +1,4 @@
-package viaje;
+package viajes;
 
 import java.time.LocalDateTime;
 

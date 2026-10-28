@@ -1,4 +1,4 @@
-package viaje;
+package viajes;
 
 import enums.EstadoViaje;
 import vehiculos.Vehiculo;
@@ -13,7 +13,6 @@ public class Viaje {
     private double importe;
     private Vehiculo vehiculousado;
     private int minutosbonificados;
-
 
     public Viaje(Vehiculo vehiculousado,double distancia,double importe,int minutosbonificados){
         this.inicio = LocalDateTime.now();
@@ -38,7 +37,3 @@ public class Viaje {
 
     }
 }
-
-
-
-

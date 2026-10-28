@@ -34,7 +34,6 @@ public class Usuario {
         this.mediosPago = new ArrayList<>();
     }
     
-    
     public void verificarHabilitacion(double montoMinimo)
             throws UsuarioInhabilitadoException, SaldoInsuficienteException, ViajeAbiertoException {
         if (!this.habilitado) {
@@ -49,7 +48,6 @@ public class Usuario {
         // }
     }
     
-    
     public void recargarSaldo(double monto,TipoMedioPago tipo, String identificador) throws ReglaNegocioException {  
         MedioPago medio = null;
         for (MedioPago m : this.mediosPago) {
@@ -63,8 +61,7 @@ public class Usuario {
         this.cuenta.recargar(monto, "Recarga con " + tipo + " " + identificador);
         this.rehabilitar();
     }
-    
-    
+
     //Hay que agregarla al diagrama porque no existe
     public void rehabilitar() {
         if (!this.habilitado && this.cuenta.getSaldo() >= 0) {
@@ -88,5 +85,4 @@ public class Usuario {
     public void inhabilitar(){
         this.habilitado = false;
     }
-    
 }

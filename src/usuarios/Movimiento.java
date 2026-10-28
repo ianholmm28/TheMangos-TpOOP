@@ -34,7 +34,6 @@ public class Movimiento implements Comparable<Movimiento>{
         return concepto;
     }
 
-
     @Override
     public int compareTo(Movimiento otro){
         return this.fecha.compareTo(otro.fecha);

@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ControladorUsuarios {
-    private Map<String, Usuario> usuarios;
 
+    private Map<String, Usuario> usuarios;
 
     public ControladorUsuarios() {
         this.usuarios = new HashMap<>();
@@ -39,7 +39,6 @@ public class ControladorUsuarios {
             throw new UsuarioNoEncontradoException("no existe un usuario con ese documento");
         }
         usuario.recargarSaldo(monto, medio, identificador);
-        
     }
         
     public void suscribirPlan(String documento)throws UsuarioNoEncontradoException, SaldoInsuficienteException{
@@ -49,6 +48,4 @@ public class ControladorUsuarios {
         }
         usuario.suscribirPlan(YearMonth.now());
     }
-        
-    
 }
