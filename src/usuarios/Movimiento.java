@@ -1,7 +1,6 @@
 package usuarios;
 
 import java.time.LocalDateTime;
-
 import enums.TipoMovimiento;
 
 public class Movimiento implements Comparable<Movimiento>{
