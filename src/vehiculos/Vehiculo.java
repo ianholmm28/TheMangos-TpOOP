@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Vehiculo {
-    private String codigo;
-    private LocalDate fechaAlta;
-    private double kmRecorridos;
-    private EstadoVehiculo estado;
-    private List<ReporteFalla> fallas;
+    protected String codigo;
+    protected LocalDate fechaAlta;
+    protected double kmRecorridos;
+    protected EstadoVehiculo estado;
+    protected List<ReporteFalla> fallas;
 
     public Vehiculo(String codigo, LocalDate fechaAlta){
         this.codigo = codigo;
