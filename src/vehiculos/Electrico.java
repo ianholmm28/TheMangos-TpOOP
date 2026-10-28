@@ -1,6 +1,6 @@
 package vehiculos;
 
 public interface Electrico {
-    int getNivelbateria();
+    int getNivelBateria();
     void actualizarBateria(int nivel);
 }
