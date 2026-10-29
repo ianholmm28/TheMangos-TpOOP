@@ -102,4 +102,8 @@ public class Usuario {
         return !yaViajo;
     }
     public PlanMensual getPlan(){return plan;}
+
+    public Cuenta getCuenta() {return cuenta;}
+
+    public String getDocumento(){return documento;}
 }
