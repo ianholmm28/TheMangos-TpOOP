@@ -65,7 +65,7 @@ public class Estacion {
     }
 
     public boolean estaLlenaPara(TipoVehiculo tipo){
-        return lugaresLibres(tipo) == 0;
+        return lugaresLibres(tipo) <= 0;
     }
 
     public int getCapacidadTotal(){
@@ -81,7 +81,7 @@ public class Estacion {
         if (capacidadTotal == 0){
             return 0;
         }
-        double ocupacion = this.vehiculos.size() / capacidadTotal;
+        double ocupacion = (double) this.vehiculos.size() / capacidadTotal;
         return ocupacion;
     }
 

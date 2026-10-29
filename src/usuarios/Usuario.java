@@ -5,6 +5,7 @@ import excepciones.SaldoInsuficienteException;
 import excepciones.ReglaNegocioException;
 import excepciones.UsuarioInhabilitadoException;
 import excepciones.ViajeAbiertoException;
+import viajes.Viaje;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -21,7 +22,7 @@ public class Usuario {
     private Cuenta cuenta;
     private PlanMensual plan;
     private List<MedioPago> mediosPago;
- // private Viaje viajeEnCurso; // agregar cuando exista la clase Viaje
+    private Viaje viajeEnCurso;
 
     public Usuario(String nombre, String documento, String email) {
         this.nombre = nombre;
@@ -42,10 +43,9 @@ public class Usuario {
         if (!this.cuenta.tieneSaldo(montoMinimo)) {
             throw new SaldoInsuficienteException("Saldo insuficiente para retirar el vehículo");
         }
-        // Viaje no existe todavia, descomentar cuando este
-        // if (this.viajeEnCurso != null) {
-        //     throw new ViajeAbiertoException("El usuario ya tiene un viaje en curso");
-        // }
+        if (this.viajeEnCurso != null) {
+            throw new ViajeAbiertoException("El usuario ya tiene un viaje en curso");
+        }
     }
     
     public void recargarSaldo(double monto,TipoMedioPago tipo, String identificador) throws ReglaNegocioException {  
@@ -84,5 +84,15 @@ public class Usuario {
     
     public void inhabilitar(){
         this.habilitado = false;
+    }
+
+    public void iniciarViaje(Viaje viaje){
+        this.viajeEnCurso = viaje;
+    }
+    public void finalizarViaje(){
+        this.viajeEnCurso = null;
+    }
+    public Viaje getViajeEnCurso(){
+        return viajeEnCurso;
     }
 }

@@ -45,6 +45,7 @@ public class Viaje {
             PuntoRecorrido ultimoPunto = this.puntos.get(this.puntos.size() -1);
             this.distancia += calcularDistanciaKm(ultimoPunto, nuevoPunto);
         }
+        this.puntos.add(nuevoPunto);
     }
 
     public void cerrar(Estacion destino, LocalDateTime fin){
@@ -58,13 +59,14 @@ public class Viaje {
     }
 
     public long getMinutosCobrables(){
+        LocalDateTime momentoFin = this.fin != null ? this.fin : this.inicio;
         long segundos = Duration.between(this.inicio, this.fin).getSeconds();
-        long minutosTotales = (long) Math.ceil(segundos / 60);
+        long minutosTotales = (long) Math.ceil(segundos / 60.0);
         long minutosCobrables = minutosTotales - this.minutosBonificados;
-        return minutosCobrables;
+        return Math.max(0, minutosCobrables);
     }
 
-    public void agregarNotaAjuste(LocalDateTime fecha, String motivo, double impoerte){
+    public void agregarNotaAjuste(LocalDateTime fecha, String motivo, double importe){
         NotaAjuste nota = new NotaAjuste(fecha, motivo, importe);
         this.notasAjuste.add(nota);
     }
