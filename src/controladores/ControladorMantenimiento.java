@@ -34,6 +34,7 @@ public class ControladorMantenimiento {
     public void reportarFalla(String codVehiculo, String descripcion) throws ReglaNegocioException {
         Vehiculo vehiculo = buscarVehiculo(codVehiculo);
         LocalDateTime ahora = this.reloj.ahora();
+        vehiculo.registrarFalla(descripcion, ahora);
 
         int fallasUltimos30Dias = vehiculo.fallasUltimos30Dias(ahora);
         if (fallasUltimos30Dias >=3){

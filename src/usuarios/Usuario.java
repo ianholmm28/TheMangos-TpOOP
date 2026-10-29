@@ -70,10 +70,10 @@ public class Usuario {
     }
 
     public void suscribirPlan(YearMonth mes) throws SaldoInsuficienteException {
-        if (!this.cuenta.tieneSaldo(PlanMensual.COSTO_PLAN)) {
+        if (!this.cuenta.tieneSaldo(PlanMensual.costoPlan)) {
             throw new SaldoInsuficienteException("Saldo insuficiente para el plan mensual");
         }
-        this.cuenta.debitar(PlanMensual.COSTO_PLAN, "Plan mensual " + mes);
+        this.cuenta.debitar(PlanMensual.costoPlan, "Plan mensual " + mes);
         this.plan = new PlanMensual(mes);
     }
     
