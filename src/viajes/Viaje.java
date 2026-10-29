@@ -60,7 +60,7 @@ public class Viaje {
 
     public long getMinutosCobrables(){
         LocalDateTime momentoFin = this.fin != null ? this.fin : this.inicio;
-        long segundos = Duration.between(this.inicio, this.fin).getSeconds();
+        long segundos = Duration.between(this.inicio, momentoFin).getSeconds();
         long minutosTotales = (long) Math.ceil(segundos / 60.0);
         long minutosCobrables = minutosTotales - this.minutosBonificados;
         return Math.max(0, minutosCobrables);

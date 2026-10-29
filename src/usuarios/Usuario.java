@@ -23,6 +23,7 @@ public class Usuario {
     private PlanMensual plan;
     private List<MedioPago> mediosPago;
     private Viaje viajeEnCurso;
+    private boolean yaViajo;
 
     public Usuario(String nombre, String documento, String email) {
         this.nombre = nombre;
@@ -33,6 +34,7 @@ public class Usuario {
         this.cuenta = new Cuenta(0, new ArrayList<Movimiento>());
         this.plan = null;
         this.mediosPago = new ArrayList<>();
+        this.yaViajo = false;
     }
     
     public void verificarHabilitacion(double montoMinimo)
@@ -91,8 +93,13 @@ public class Usuario {
     }
     public void finalizarViaje(){
         this.viajeEnCurso = null;
+        this.yaViajo = true;
     }
     public Viaje getViajeEnCurso(){
         return viajeEnCurso;
     }
+    public boolean esPrimerViaje(){
+        return !yaViajo;
+    }
+    public PlanMensual getPlan(){return plan;}
 }
