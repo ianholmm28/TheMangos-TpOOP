@@ -34,6 +34,12 @@ public class IniciarSesionController extends Pantalla implements Initializable {
     @FXML
     void ingresar(ActionEvent event) {
         // TODO: buscar al usuario por documento
+        // Por ahora pasa directo a la pantalla principal, sin validar datos
+        try {
+            Main.mostrarPantalla("principal/PantallaPrincipal.fxml");
+        } catch (IOException e) {
+            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
+        }
     }
 
     @FXML
