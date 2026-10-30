@@ -60,8 +60,8 @@ public class ControladorViajes {
             throw new ReglaNegocioException("El usuario no tiene ningún viaje en curso para cancelar.");
         }
 
-        long minutosTranscurridos = Duration.between(viaje.getInicio(), this.reloj.ahora()).toMinutes();
-        if (minutosTranscurridos > 2) {
+        long segundosTranscurridos = Duration.between(viaje.getInicio(), this.reloj.ahora()).getSeconds();
+        if (segundosTranscurridos > 120) {
             throw new ReglaNegocioException("Pasaron más de 2 minutos. No se puede cancelar, debe devolver el vehículo.");
         }
 
@@ -69,7 +69,7 @@ public class ControladorViajes {
         Vehiculo vehiculo = viaje.getVehiculo();
         vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
         viaje.getOrigen().recibir(vehiculo);
-        usuario.finalizarViaje();
+        usuario.cancelarViaje();
     }
 
     public void registrarPunto(String documento, double lat, double lon) throws ReglaNegocioException {
@@ -78,10 +78,14 @@ public class ControladorViajes {
         if (viaje == null) {
             throw new ReglaNegocioException("El usuario no tiene un viaje en curso.");
         }
-        viaje.agregarPunto(this.reloj.ahora(), lon, lat);
+        viaje.agregarPunto(lat, lon, this.reloj.ahora());
     }
 
     public Viaje devolverVehiculo(String documento, String codEstacion) throws ReglaNegocioException {
+        return devolverVehiculo(documento, codEstacion, -1);
+    }
+
+    public Viaje devolverVehiculo(String documento, String codEstacion, int nivelBateria) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
         Viaje viaje = usuario.getViajeEnCurso();
         if (viaje == null) {
@@ -92,18 +96,26 @@ public class ControladorViajes {
         Vehiculo vehiculo = viaje.getVehiculo();
 
         if (destino.estaLlenaPara(vehiculo.getTipo())) {
-            viaje.registrarIntentoEstacionLlena();
+            viaje.registrarIntentoEstacionLlena(this.reloj.ahora());
             throw new EstacionLlenaException("La estación de destino está llena. Dispone de 10 minutos sin cargo para llegar a otra.");
         }
 
         viaje.cerrar(destino, this.reloj.ahora());
         destino.recibir(vehiculo);
 
-        if (vehiculo instanceof Electrico && ((Electrico) vehiculo).getNivelBateria() < 15) {
-            vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
-        } else {
-            vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        if (nivelBateria >= 0 && vehiculo instanceof Electrico) {
+            ((Electrico) vehiculo).actualizarBateria(nivelBateria);
         }
+
+        if (vehiculo.getEstado() != EstadoVehiculo.EN_REPARACION) {
+            if (vehiculo instanceof Electrico && ((Electrico) vehiculo).getNivelBateria() < 15) {
+                vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
+            } else {
+                vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+            }
+        }
+
+        vehiculo.agregarKm(viaje.getDistancia());
 
         double importe = this.calculador.calcular(viaje);
         viaje.setImporte(importe);
@@ -126,11 +138,12 @@ public class ControladorViajes {
         }
 
         viaje.agregarNotaAjuste(this.reloj.ahora(), motivo, importe);
+        viaje.getUsuario().getCuenta().ajustar(importe, "Nota de ajuste: " + motivo);
 
-        if (importe > 0) {
-            viaje.getUsuario().getCuenta().recargar(importe, "Nota de ajuste: " + motivo);
-        } else if (importe < 0) {
-            viaje.getUsuario().getCuenta().debitar(Math.abs(importe), "Nota de ajuste: " + motivo);
+        if (viaje.getUsuario().getCuenta().getSaldo() >= 0) {
+            viaje.getUsuario().rehabilitar();
+        } else {
+            viaje.getUsuario().inhabilitar();
         }
     }
 
@@ -141,9 +154,12 @@ public class ControladorViajes {
                 long horas = Duration.between(v.getInicio(), this.reloj.ahora()).toHours();
                 if (horas >= 24) {
                     v.setEstado(EstadoViaje.PERDIDO);
+                    v.setImporte(150000.0);
                     v.getVehiculo().setEstado(EstadoVehiculo.FUERA_DE_SERVICIO);
                     v.getUsuario().getCuenta().debitar(150000.0, "Cargo fijo por vehículo perdido");
-                    v.getUsuario().inhabilitar();
+                    if (v.getUsuario().getCuenta().getSaldo() < 0) {
+                        v.getUsuario().inhabilitar();
+                    }
                     v.getUsuario().finalizarViaje();
                     vencidos.add(v);
                 }

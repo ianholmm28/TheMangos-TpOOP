@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class ReporteFalla {
     private LocalDateTime fecha;
-    String descripcion;
+    private String descripcion;
 
     public ReporteFalla(LocalDateTime fecha, String descripcion){
         this.fecha = fecha;

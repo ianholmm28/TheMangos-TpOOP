@@ -32,12 +32,18 @@ public class ControladorMantenimiento {
     }
 
     public void reportarFalla(String codVehiculo, String descripcion) throws ReglaNegocioException {
+        if (descripcion == null || descripcion.trim().isEmpty()) {
+            throw new ReglaNegocioException("La descripción de la falla no puede estar vacía.");
+        }
         Vehiculo vehiculo = buscarVehiculo(codVehiculo);
+        if (vehiculo.getEstado() == EstadoVehiculo.FUERA_DE_SERVICIO) {
+            throw new ReglaNegocioException("No se pueden reportar fallas sobre un vehículo fuera de servicio.");
+        }
         LocalDateTime ahora = this.reloj.ahora();
         vehiculo.registrarFalla(descripcion, ahora);
 
         int fallasUltimos30Dias = vehiculo.fallasUltimos30Dias(ahora);
-        if (fallasUltimos30Dias >=3){
+        if (fallasUltimos30Dias >= 3){
             vehiculo.enviarAReparacion();
             notificarOperador(vehiculo);
         }
@@ -50,6 +56,13 @@ public class ControladorMantenimiento {
     public OrdenMantenimiento generarOrden(String codVehiculo, String legajoTecnico) throws ReglaNegocioException{
         Vehiculo vehiculo = buscarVehiculo(codVehiculo);
         Tecnico tecnico = buscarTecnico(legajoTecnico);
+
+        if (vehiculo.getEstado() == EstadoVehiculo.EN_USO) {
+            throw new ReglaNegocioException("No se puede generar una orden de mantenimiento para un vehículo en uso.");
+        }
+        if (vehiculo.getEstado() == EstadoVehiculo.FUERA_DE_SERVICIO) {
+            throw new ReglaNegocioException("No se puede generar una orden de mantenimiento para un vehículo fuera de servicio.");
+        }
 
         for (OrdenMantenimiento orden : this.ordenes){
             if (orden.getVehiculo().getCodigo().equals(codVehiculo) && orden.estaAbierta()){
@@ -72,10 +85,21 @@ public class ControladorMantenimiento {
 
         LocalDate fechaCierre = this.reloj.ahora().toLocalDate();
         orden.cerrar(fechaCierre, tareas, repuestos);
-        orden.getVehiculo().setEstado(EstadoVehiculo.DISPONIBLE);
+        Vehiculo v = orden.getVehiculo();
+        if (v instanceof Electrico && ((Electrico) v).getNivelBateria() < 15) {
+            v.setEstado(EstadoVehiculo.BATERIA_BAJA);
+        } else {
+            v.setEstado(EstadoVehiculo.DISPONIBLE);
+        }
     }
 
     public void registrarCarga(Electrico vehiculo, int nuevoNivel) throws ReglaNegocioException{
+        if (vehiculo == null) {
+            throw new ReglaNegocioException("El vehículo eléctrico no puede ser nulo.");
+        }
+        if (nuevoNivel < 0 || nuevoNivel > 100) {
+            throw new ReglaNegocioException("El nivel de batería debe estar entre 0 y 100.");
+        }
         vehiculo.actualizarBateria(nuevoNivel);
     }
 

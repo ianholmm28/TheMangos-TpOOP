@@ -12,16 +12,19 @@ public class BicicletaElectrica extends Vehiculo implements Electrico {
     public BicicletaElectrica(String codigo, int autonomia, int nivelBateria, LocalDate fechaAlta){
         super(codigo, fechaAlta);
         this.autonomia = autonomia;
-        this.nivelBateria = nivelBateria;
+        this.nivelBateria = Math.max(0, Math.min(100, nivelBateria));
+        if (this.nivelBateria < 15) {
+            setEstado(EstadoVehiculo.BATERIA_BAJA);
+        }
     }
 
     @Override
-     public void actualizarBateria(int nivel){
-        this.nivelBateria = nivel;
-        if (nivel<15){
+    public void actualizarBateria(int nivel){
+        this.nivelBateria = Math.max(0, Math.min(100, nivel));
+        if (getEstado() == EstadoVehiculo.DISPONIBLE && this.nivelBateria < 15){
             setEstado(EstadoVehiculo.BATERIA_BAJA);
         }
-        else if (getEstado() == EstadoVehiculo.BATERIA_BAJA){
+        else if (getEstado() == EstadoVehiculo.BATERIA_BAJA && this.nivelBateria >= 15){
             setEstado(EstadoVehiculo.DISPONIBLE);
         }
     }

@@ -25,7 +25,7 @@ public class OrdenMantenimiento {
     }
 
     public void cerrar(LocalDate fecha, String tareas, String respuestos) throws ReglaNegocioException {
-        if (fecha == null || tareas == null || tecnico == null){
+        if (fecha == null || tareas == null || tareas.trim().isEmpty() || tecnico == null){
             throw new ReglaNegocioException("No se puede cerrar la orden sin fecha, tareas, y técnico asignado.");
         }
         this.fechaCierre = fecha;
