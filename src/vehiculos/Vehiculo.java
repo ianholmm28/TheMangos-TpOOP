@@ -51,6 +51,7 @@ public abstract class Vehiculo {
     public LocalDate getFechaAlta(){return fechaAlta;}
     public double getKmRecorridos() {return kmRecorridos;}
     public EstadoVehiculo getEstado(){return estado;}
+    public int getCantidadFallas(){return fallas.size();}
 
     public void setEstado(EstadoVehiculo estado){
         this.estado = estado;
