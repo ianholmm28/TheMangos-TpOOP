@@ -11,7 +11,7 @@ import reportes.GeneradorReportes;
 public abstract class Pantalla {
     private static final Sistema sistema = new Sistema();
 
-    public Sistema getSistema() {return sistema;}
+    public static Sistema getSistema() {return sistema;}
     public ControladorUsuarios getControladorUsuarios() {return sistema.getControladorUsuarios();}
     public ControladorViajes getControladorViajes() {return sistema.getControladorViajes();}
     public ControladorEstaciones getControladorEstaciones() {return sistema.getControladorEstaciones();}

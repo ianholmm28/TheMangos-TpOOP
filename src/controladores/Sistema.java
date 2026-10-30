@@ -9,11 +9,13 @@ import reloj.Reloj;
 import reloj.RelojSistema;
 import reportes.GeneradorReportes;
 import tarifas.CalculadorTarifa;
+import tarifas.Tarifa;
 import usuarios.Usuario;
 import vehiculos.OrdenMantenimiento;
 import vehiculos.Vehiculo;
 import viajes.Viaje;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,15 +27,15 @@ public class Sistema {
     private final CalculadorTarifa calculador;
     private final GeneradorReportes generadorReportes;
 
-    private final Map<String, Usuario> usuarios;
-    private final Map<String, Estacion> estaciones;
-    private final Map<String, Vehiculo> vehiculos;
-    private final Map<String, Personal> personal;
-    private final Map<String, Tecnico> tecnicos;
-    private final Map<String, Operador> operadores;
-    private final List<Viaje> viajes;
-    private final List<Traslado> traslados;
-    private final List<OrdenMantenimiento> ordenes;
+    private Map<String, Usuario> usuarios;
+    private Map<String, Estacion> estaciones;
+    private Map<String, Vehiculo> vehiculos;
+    private Map<String, Personal> personal;
+    private Map<String, Tecnico> tecnicos;
+    private Map<String, Operador> operadores;
+    private List<Viaje> viajes;
+    private List<Traslado> traslados;
+    private List<OrdenMantenimiento> ordenes;
 
     private final ControladorUsuarios controladorUsuarios;
     private final ControladorViajes controladorViajes;
@@ -68,9 +70,49 @@ public class Sistema {
         this.generadorReportes = new GeneradorReportes(viajes, vehiculos, estaciones);
     }
 
-    public void cargarDatos(){}
+    public void cargarDatos(){
+        File archivo = new File("sistema.dat");
+        if (!archivo.exists()){
+            return;
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("sistema.dat"))){
+            this.usuarios = (Map<String, Usuario>) ois.readObject();
+            this.estaciones = (Map<String, Estacion>) ois.readObject();
+            this.vehiculos = (Map<String, Vehiculo>) ois.readObject();
+            this.personal = (Map<String, Personal>) ois.readObject();
+            this.tecnicos = (Map<String, Tecnico>) ois.readObject();
+            this.operadores = (Map<String, Operador>) ois.readObject();
+            this.viajes = (List<Viaje>) ois.readObject();
+            this.traslados = (List<Traslado>) ois.readObject();
+            this.ordenes = (List<OrdenMantenimiento>) ois.readObject();
 
-    public void guardarDatos(){}
+            List<Tarifa> tarifas = (List<Tarifa>) ois.readObject();
+            for (Tarifa tarifa : tarifas){
+                this.calculador.agregarTarifa(tarifa);
+            }
+         }
+        catch (IOException | ClassNotFoundException e){
+            System.out.println("Error de E/S: "+e.getMessage());
+        }
+    }
+
+    public void guardarDatos(){
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("sistema.dat"))){
+            oos.writeObject(this.usuarios);
+            oos.writeObject(this.estaciones);
+            oos.writeObject(this.vehiculos);
+            oos.writeObject(this.personal);
+            oos.writeObject(this.tecnicos);
+            oos.writeObject(this.operadores);
+            oos.writeObject(this.viajes);
+            oos.writeObject(this.traslados);
+            oos.writeObject(this.ordenes);
+            oos.writeObject(this.calculador.getTarifas());
+        }
+        catch (IOException e){
+            System.out.println("Error de E/S: "+e.getMessage());
+        }
+    }
 
     public ControladorUsuarios getControladorUsuarios() { return controladorUsuarios; }
     public ControladorViajes getControladorViajes() { return controladorViajes; }
