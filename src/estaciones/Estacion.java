@@ -58,6 +58,23 @@ public class Estacion {
         return contador;
     }
 
+    public int cantidadVehiculosDisponiblesPorTipo(TipoVehiculo tipo){
+        int contador = 0;
+        for (Vehiculo vehiculo : this.vehiculos){
+            if (vehiculo.getTipo() == tipo && vehiculo.estaDisponible()){
+                contador++;
+            }
+        }
+        return contador;
+    }
+
+    public void modificar(String direccion, double latitud, double longitud, Map<TipoVehiculo, Integer> capacidades){
+        this.direccion = direccion;
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.capacidadPorTipo = new HashMap<>(capacidades);
+    }
+
     public int lugaresLibres(TipoVehiculo tipo){
         int capacidad = this.capacidadPorTipo.getOrDefault(tipo, 0);
         int presentes = cantidadVehiculosPorTipo(tipo);

@@ -12,6 +12,7 @@ import tarifas.Promocion;
 import tarifas.Tarifa;
 import vehiculos.BicicletaComun;
 import vehiculos.BicicletaElectrica;
+import vehiculos.Electrico;
 import vehiculos.MonopatinElectrico;
 import vehiculos.Vehiculo;
 
@@ -71,6 +72,10 @@ public class ControladorAdministracion {
             default -> throw new ReglaNegocioException("Tipo de vehículo no reconocido: " + tipo);
         }
 
+        if (nuevo instanceof Electrico && ((Electrico) nuevo).getNivelBateria() < 15) {
+            nuevo.setEstado(EstadoVehiculo.BATERIA_BAJA);
+        }
+
         estacion.recibir(nuevo);
         this.vehiculos.put(codigo, nuevo);
         return nuevo;
@@ -85,6 +90,12 @@ public class ControladorAdministracion {
             throw new ReglaNegocioException("No se puede dar de baja el vehículo " + codigo + " porque se encuentra en uso.");
         }
         v.setEstado(EstadoVehiculo.FUERA_DE_SERVICIO);
+        for (Estacion e : this.estaciones.values()) {
+            if (e.buscarVehiculo(codigo) != null) {
+                e.entregar(codigo);
+                break;
+            }
+        }
     }
 
     public void registrarPersonal(Personal p) throws ReglaNegocioException {
@@ -93,6 +104,13 @@ public class ControladorAdministracion {
         }
         if (this.personal.containsKey(p.getLegajo())) {
             throw new ReglaNegocioException("Ya existe personal registrado con el legajo: " + p.getLegajo());
+        }
+        if (p instanceof personal.Administrador) {
+            for (Personal existente : this.personal.values()) {
+                if (existente instanceof personal.Administrador) {
+                    throw new ReglaNegocioException("Ya existe un administrador en el sistema.");
+                }
+            }
         }
         this.personal.put(p.getLegajo(), p);
     }

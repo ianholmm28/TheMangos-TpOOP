@@ -24,6 +24,12 @@ public class Cuenta {
        this.saldo -= monto;
        this.movimientos.add(movimiento);
     }
+
+    public void ajustar(double monto, String concepto){
+       Movimiento movimiento = new Movimiento(LocalDateTime.now(), Math.abs(monto), TipoMovimiento.AJUSTE, concepto);
+       this.saldo += monto;
+       this.movimientos.add(movimiento);
+    }
     
     public boolean tieneSaldo(double monto){
         return this.saldo >= monto;

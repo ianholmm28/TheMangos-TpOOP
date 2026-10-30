@@ -44,7 +44,25 @@ public class ControladorEstaciones {
         return nuevaEstacion;
     }
 
+    public void modificarEstacion(String codigo, String nuevaDireccion, double nuevaLatitud, double nuevaLongitud, Map<TipoVehiculo, Integer> nuevasCapacidades) throws ReglaNegocioException {
+        Estacion estacion = buscarEstacion(codigo);
+        for (Map.Entry<TipoVehiculo, Integer> entrada : nuevasCapacidades.entrySet()) {
+            TipoVehiculo tipo = entrada.getKey();
+            int capacidad = entrada.getValue();
+            if (capacidad <= 0) {
+                throw new ReglaNegocioException("La capacidad para cada vehículo debe ser mayor a cero.");
+            }
+            if (capacidad < estacion.cantidadVehiculosPorTipo(tipo)) {
+                throw new ReglaNegocioException("La nueva capacidad no puede ser menor a los vehículos presentes para " + tipo);
+            }
+        }
+        estacion.modificar(nuevaDireccion, nuevaLatitud, nuevaLongitud, nuevasCapacidades);
+    }
+
     public Traslado registrarTraslado(String codOrigen, String codDestino, List<String> codVehiculos, String legajoOperador) throws ReglaNegocioException, VehiculoNoDisponibleException, EstacionLlenaException{
+        if (codVehiculos == null || codVehiculos.isEmpty()){
+            throw new ReglaNegocioException("Debe seleccionar al menos un vehículo para trasladar.");
+        }
         Estacion origen = buscarEstacion(codOrigen);
         Estacion destino = buscarEstacion(codDestino);
         Operador operador = buscarOperador(legajoOperador);

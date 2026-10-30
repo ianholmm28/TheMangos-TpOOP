@@ -38,20 +38,28 @@ public class Viaje {
         this.notasAjuste = new ArrayList<>();
     }
 
-    public void agregarPunto(LocalDateTime hora, double longitud, double latitud){
-        PuntoRecorrido nuevoPunto = new PuntoRecorrido(hora,longitud,latitud);
+    public void agregarPunto(double latitud, double longitud, LocalDateTime hora){
+        PuntoRecorrido nuevoPunto = new PuntoRecorrido(hora, longitud, latitud);
 
         if(!this.puntos.isEmpty()){
-            PuntoRecorrido ultimoPunto = this.puntos.get(this.puntos.size() -1);
+            PuntoRecorrido ultimoPunto = this.puntos.get(this.puntos.size() - 1);
             this.distancia += calcularDistanciaKm(ultimoPunto, nuevoPunto);
         }
         this.puntos.add(nuevoPunto);
+    }
+
+    public void agregarPunto(LocalDateTime hora, double longitud, double latitud){
+        agregarPunto(latitud, longitud, hora);
     }
 
     public void cerrar(Estacion destino, LocalDateTime fin){
         this.destino = destino;
         this.fin = fin;
         this.estado = EstadoViaje.CERRADO;
+    }
+
+    public void registrarIntentoEstacionLlena(LocalDateTime hora){
+        this.minutosBonificados = 10;
     }
 
     public void registrarIntentoEstacionLlena(){
