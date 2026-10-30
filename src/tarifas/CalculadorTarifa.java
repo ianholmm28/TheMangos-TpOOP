@@ -26,6 +26,10 @@ public class CalculadorTarifa {
         this.promociones.add(promocion);
     }
 
+    public List<Tarifa> getTarifas(){
+        return this.tarifas;
+    }
+
     public double saldoMinimo(TipoVehiculo tipo) throws ReglaNegocioException {
         Tarifa tarifa = tarifaVigente(tipo, LocalDate.now());
         return tarifa.calcularBase(30);

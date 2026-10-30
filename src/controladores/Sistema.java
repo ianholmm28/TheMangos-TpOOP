@@ -44,6 +44,8 @@ public class Sistema {
     public Sistema() {
         this.reloj = new RelojSistema();
         this.calculador = new CalculadorTarifa();
+        this.calculador.agregarPromocion(new tarifas.PromocionPrimerViaje());
+        this.calculador.agregarPromocion(new tarifas.PromocionPlanMensual());
 
         this.usuarios = new HashMap<>();
         this.estaciones = new HashMap<>();

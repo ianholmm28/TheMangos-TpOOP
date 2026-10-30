@@ -3,12 +3,13 @@ package estaciones;
 import enums.TipoVehiculo;
 import vehiculos.Vehiculo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-public class Estacion {
+public class Estacion implements Serializable {
     private String codigo;
     private String direccion;
     private double latitud;

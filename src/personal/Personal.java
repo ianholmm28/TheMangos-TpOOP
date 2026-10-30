@@ -1,6 +1,8 @@
 package personal;
 
-public abstract class Personal {
+import java.io.Serializable;
+
+public abstract class Personal implements Serializable {
     protected String legajo;
     protected String nombre;
     protected String telefono;

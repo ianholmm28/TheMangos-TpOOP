@@ -53,6 +53,13 @@ public class ControladorUsuarios {
         usuario.agregarMediosPago(medio, identificador);
     }
 
+    public void agregarMedioPago(String documento, usuarios.MedioPago medio) throws ReglaNegocioException {
+        if (medio == null) {
+            throw new ReglaNegocioException("El medio de pago no puede ser nulo.");
+        }
+        agregarMedioPago(documento, medio.getTipo(), medio.getIdentificador());
+    }
+
     public void quitarMedioPago(String documento, TipoMedioPago medio, String identificador) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
         usuario.quitarMedioPago(medio, identificador);
@@ -64,6 +71,13 @@ public class ControladorUsuarios {
         }
         Usuario usuario = buscarUsuario(documento);
         usuario.recargarSaldo(monto, medio, identificador);
+    }
+
+    public void recargarSaldo(String documento, double monto, usuarios.MedioPago medio) throws ReglaNegocioException {
+        if (medio == null) {
+            throw new ReglaNegocioException("El medio de pago no puede ser nulo.");
+        }
+        recargarSaldo(documento, medio.getTipo(), medio.getIdentificador(), monto);
     }
         
     public void suscribirPlan(String documento) throws ReglaNegocioException {

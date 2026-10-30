@@ -3,11 +3,12 @@ package estaciones;
 import personal.Operador;
 import vehiculos.Vehiculo;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Traslado {
+public class Traslado implements Serializable {
 
     private Estacion origen;
     private Estacion destino;
