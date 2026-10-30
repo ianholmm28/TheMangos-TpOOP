@@ -18,6 +18,7 @@ public class Main extends Application {
         contexto = new Contexto();
         stage.setTitle("TheMangos");
         mostrarPantalla("usuarios/RegistrarUsuario.fxml");
+        stage.setMaximized(true);
         stage.show();
     }
 

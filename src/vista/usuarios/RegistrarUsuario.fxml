@@ -1,16 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="vista.usuarios.RegistrarUsuarioController">
+<StackPane styleClass="fondo" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.usuarios.RegistrarUsuarioController">
    <children>
-      <Button alignment="CENTER" contentDisplay="RIGHT" layoutX="114.0" layoutY="115.0" mnemonicParsing="false" onAction="#registrar" prefHeight="49.0" prefWidth="392.0" text="Soy un boton" textFill="#dd2727" textOverrun="CLIP">
-         <font>
-            <Font name="Noto Kufi Arabic Regular" size="43.0" />
-         </font>
-      </Button>
+      <VBox maxHeight="-Infinity" maxWidth="420.0" spacing="18.0" styleClass="card">
+         <children>
+            <VBox spacing="6.0">
+               <children>
+                  <Label styleClass="titulo" text="Crear cuenta" />
+                  <Label styleClass="subtitulo" text="Registrate para usar bicicletas y monopatines" wrapText="true" />
+               </children>
+            </VBox>
+            <VBox spacing="6.0">
+               <children>
+                  <Label styleClass="campo-label" text="Nombre completo" />
+                  <TextField fx:id="txtNombre" promptText="Ej: Juan Pérez" />
+               </children>
+            </VBox>
+            <VBox spacing="6.0">
+               <children>
+                  <Label styleClass="campo-label" text="Documento" />
+                  <TextField fx:id="txtDocumento" promptText="Ej: 40123456" />
+               </children>
+            </VBox>
+            <VBox spacing="6.0">
+               <children>
+                  <Label styleClass="campo-label" text="Correo electrónico" />
+                  <TextField fx:id="txtEmail" promptText="Ej: juan@mail.com" />
+               </children>
+            </VBox>
+            <Button fx:id="btnRegistrar" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#registrar" styleClass="boton-primario" text="Registrarme" />
+            <Label fx:id="lblMensaje" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
+            <HBox alignment="CENTER" spacing="4.0">
+               <children>
+                  <Label styleClass="pie" text="¿Ya tenés cuenta?" />
+                  <Hyperlink onAction="#irAIniciarSesion" styleClass="link" text="Iniciar sesión" />
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="36.0" left="36.0" right="36.0" top="36.0" />
+         </padding>
+      </VBox>
    </children>
-</AnchorPane>
+</StackPane>
