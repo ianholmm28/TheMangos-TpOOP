@@ -1,16 +1,28 @@
 package vista;
 
-/**
- * Clase base de los controladores de pantalla. Main le pasa el Contexto al
- * cargar cada FXML, asi todas las pantallas usan los mismos controladores.
- *
- * Ojo: el contexto se asigna despues de initialize(), asi que se usa en los
- * metodos de los eventos (botones, etc.), no dentro de initialize().
- */
-public abstract class Pantalla {
-    protected Contexto contexto;
+import controladores.ControladorAdministracion;
+import controladores.ControladorEstaciones;
+import controladores.ControladorMantenimiento;
+import controladores.ControladorUsuarios;
+import controladores.ControladorViajes;
+import reloj.Reloj;
+import reloj.RelojSistema;
+import tarifas.CalculadorTarifa;
 
-    public void setContexto(Contexto contexto) {
-        this.contexto = contexto;
-    }
+
+public abstract class Pantalla {
+    private static final Reloj reloj = new RelojSistema();
+    private static final CalculadorTarifa calculador = new CalculadorTarifa();
+    private static final ControladorUsuarios controladorUsuarios = new ControladorUsuarios();
+    private static final ControladorViajes controladorViajes = new ControladorViajes(calculador, reloj);
+    private static final ControladorEstaciones controladorEstaciones = new ControladorEstaciones(reloj);
+    private static final ControladorMantenimiento controladorMantenimiento = new ControladorMantenimiento(reloj);
+    private static final ControladorAdministracion controladorAdministracion = new ControladorAdministracion(calculador);
+
+    public ControladorUsuarios getControladorUsuarios() {return controladorUsuarios;}
+    public ControladorViajes getControladorViajes() {return controladorViajes;}
+    public ControladorEstaciones getControladorEstaciones() {return controladorEstaciones;}
+    public ControladorMantenimiento getControladorMantenimiento() {return controladorMantenimiento;}
+    public ControladorAdministracion getControladorAdministracion() {return controladorAdministracion;}
 }
+
