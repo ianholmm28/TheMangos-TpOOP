@@ -29,6 +29,13 @@ public class ControladorEstaciones {
         this.reloj = reloj;
     }
 
+    public ControladorEstaciones(Map<String, Estacion> estaciones, Map<String, Operador> operadores, List<Traslado> traslados, Reloj reloj) {
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.operadores = (operadores != null) ? operadores : new HashMap<>();
+        this.traslados = (traslados != null) ? traslados : new ArrayList<>();
+        this.reloj = reloj;
+    }
+
     public Estacion registrarEstacion(String codigo, String direccion, double latitud, double longitud, Map<TipoVehiculo, Integer> capacidades) throws ReglaNegocioException{
         if (this.estaciones.containsKey(codigo)){
             throw new ReglaNegocioException("Ya existe una estación con el código: "+codigo);

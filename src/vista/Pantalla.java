@@ -5,24 +5,19 @@ import controladores.ControladorEstaciones;
 import controladores.ControladorMantenimiento;
 import controladores.ControladorUsuarios;
 import controladores.ControladorViajes;
-import reloj.Reloj;
-import reloj.RelojSistema;
-import tarifas.CalculadorTarifa;
-
+import controladores.Sistema;
+import reportes.GeneradorReportes;
 
 public abstract class Pantalla {
-    private static final Reloj reloj = new RelojSistema();
-    private static final CalculadorTarifa calculador = new CalculadorTarifa();
-    private static final ControladorUsuarios controladorUsuarios = new ControladorUsuarios();
-    private static final ControladorViajes controladorViajes = new ControladorViajes(calculador, reloj);
-    private static final ControladorEstaciones controladorEstaciones = new ControladorEstaciones(reloj);
-    private static final ControladorMantenimiento controladorMantenimiento = new ControladorMantenimiento(reloj);
-    private static final ControladorAdministracion controladorAdministracion = new ControladorAdministracion(calculador);
+    private static final Sistema sistema = new Sistema();
 
-    public ControladorUsuarios getControladorUsuarios() {return controladorUsuarios;}
-    public ControladorViajes getControladorViajes() {return controladorViajes;}
-    public ControladorEstaciones getControladorEstaciones() {return controladorEstaciones;}
-    public ControladorMantenimiento getControladorMantenimiento() {return controladorMantenimiento;}
-    public ControladorAdministracion getControladorAdministracion() {return controladorAdministracion;}
+    public Sistema getSistema() {return sistema;}
+    public ControladorUsuarios getControladorUsuarios() {return sistema.getControladorUsuarios();}
+    public ControladorViajes getControladorViajes() {return sistema.getControladorViajes();}
+    public ControladorEstaciones getControladorEstaciones() {return sistema.getControladorEstaciones();}
+    public ControladorMantenimiento getControladorMantenimiento() {return sistema.getControladorMantenimiento();}
+    public ControladorAdministracion getControladorAdministracion() {return sistema.getControladorAdministracion();}
+    public GeneradorReportes getGeneradorReportes() {return sistema.getGeneradorReportes();}
 }
+
 

@@ -10,14 +10,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import tarifas.CalculadorTarifa;
 import usuarios.Movimiento;
 
 public class ControladorUsuarios {
 
     private Map<String, Usuario> usuarios;
+    private CalculadorTarifa calculador;
 
     public ControladorUsuarios() {
         this.usuarios = new HashMap<>();
+    }
+
+    public ControladorUsuarios(Map<String, Usuario> usuarios) {
+        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
+    }
+
+    public ControladorUsuarios(Map<String, Usuario> usuarios, CalculadorTarifa calculador) {
+        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
+        this.calculador = calculador;
     }      
     
     public Usuario registrarUsuario(String nombre, String documento, String email) throws ReglaNegocioException{

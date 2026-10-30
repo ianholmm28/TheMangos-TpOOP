@@ -6,19 +6,27 @@ import viajes.Viaje;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class GeneradorReportes {
     private List<Viaje> viajes;
-    private List<Vehiculo> vehiculos;
-    private List<Estacion> estaciones;
+    private Collection<Vehiculo> vehiculos;
+    private Collection<Estacion> estaciones;
 
     public GeneradorReportes(List<Viaje> viajes, List<Vehiculo> vehiculos, List<Estacion> estaciones) {
         this.viajes = (viajes != null) ? viajes : new ArrayList<>();
         this.vehiculos = (vehiculos != null) ? vehiculos : new ArrayList<>();
         this.estaciones = (estaciones != null) ? estaciones : new ArrayList<>();
+    }
+
+    public GeneradorReportes(List<Viaje> viajes, Map<String, Vehiculo> vehiculos, Map<String, Estacion> estaciones) {
+        this.viajes = (viajes != null) ? viajes : new ArrayList<>();
+        this.vehiculos = (vehiculos != null) ? vehiculos.values() : new ArrayList<>();
+        this.estaciones = (estaciones != null) ? estaciones.values() : new ArrayList<>();
     }
 
     public List<Viaje> viajesPorUsuario(LocalDate desde, LocalDate hasta) {

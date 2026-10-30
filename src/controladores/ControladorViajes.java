@@ -32,6 +32,14 @@ public class ControladorViajes {
         this.reloj = reloj;
     }
 
+    public ControladorViajes(Map<String, Usuario> usuarios, Map<String, Estacion> estaciones, List<Viaje> viajes, CalculadorTarifa calculador, Reloj reloj) {
+        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.viajes = (viajes != null) ? viajes : new ArrayList<>();
+        this.calculador = calculador;
+        this.reloj = reloj;
+    }
+
     public Viaje retirarVehiculo(String documento, String codEstacion, String codVehiculo) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
         Estacion estacion = buscarEstacion(codEstacion);

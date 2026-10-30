@@ -31,6 +31,14 @@ public class ControladorMantenimiento {
         this.proximoNumeroOrden = 1;
     }
 
+    public ControladorMantenimiento(Map<String, Vehiculo> vehiculos, Map<String, Tecnico> tecnicos, List<OrdenMantenimiento> ordenes, Reloj reloj) {
+        this.reloj = reloj;
+        this.vehiculos = (vehiculos != null) ? vehiculos : new HashMap<>();
+        this.tecnicos = (tecnicos != null) ? tecnicos : new HashMap<>();
+        this.ordenes = (ordenes != null) ? ordenes : new ArrayList<>();
+        this.proximoNumeroOrden = this.ordenes.size() + 1;
+    }
+
     public void reportarFalla(String codVehiculo, String descripcion) throws ReglaNegocioException {
         if (descripcion == null || descripcion.trim().isEmpty()) {
             throw new ReglaNegocioException("La descripción de la falla no puede estar vacía.");

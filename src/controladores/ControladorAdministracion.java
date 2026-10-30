@@ -6,7 +6,9 @@ import estaciones.Estacion;
 import excepciones.EstacionLlenaException;
 import excepciones.ReglaNegocioException;
 import excepciones.VehiculoNoEncontradoException;
+import personal.Operador;
 import personal.Personal;
+import personal.Tecnico;
 import tarifas.CalculadorTarifa;
 import tarifas.Promocion;
 import tarifas.Tarifa;
@@ -24,12 +26,29 @@ public class ControladorAdministracion {
     private Map<String, Vehiculo> vehiculos;
     private Map<String, Estacion> estaciones;
     private Map<String, Personal> personal;
+    private Map<String, Tecnico> tecnicos;
+    private Map<String, Operador> operadores;
     private CalculadorTarifa calculador;
 
     public ControladorAdministracion(CalculadorTarifa calculador) {
         this.vehiculos = new HashMap<>();
         this.estaciones = new HashMap<>();
         this.personal = new HashMap<>();
+        this.tecnicos = new HashMap<>();
+        this.operadores = new HashMap<>();
+        this.calculador = calculador;
+    }
+
+    public ControladorAdministracion(Map<String, Vehiculo> vehiculos, Map<String, Estacion> estaciones, Map<String, Personal> personal, CalculadorTarifa calculador) {
+        this(vehiculos, estaciones, personal, new HashMap<>(), new HashMap<>(), calculador);
+    }
+
+    public ControladorAdministracion(Map<String, Vehiculo> vehiculos, Map<String, Estacion> estaciones, Map<String, Personal> personal, Map<String, Tecnico> tecnicos, Map<String, Operador> operadores, CalculadorTarifa calculador) {
+        this.vehiculos = (vehiculos != null) ? vehiculos : new HashMap<>();
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.personal = (personal != null) ? personal : new HashMap<>();
+        this.tecnicos = (tecnicos != null) ? tecnicos : new HashMap<>();
+        this.operadores = (operadores != null) ? operadores : new HashMap<>();
         this.calculador = calculador;
     }
 
@@ -113,6 +132,11 @@ public class ControladorAdministracion {
             }
         }
         this.personal.put(p.getLegajo(), p);
+        if (p instanceof Tecnico t) {
+            this.tecnicos.put(t.getLegajo(), t);
+        } else if (p instanceof Operador o) {
+            this.operadores.put(o.getLegajo(), o);
+        }
     }
 
     public void registrarTarifa(Tarifa t) throws ReglaNegocioException {
