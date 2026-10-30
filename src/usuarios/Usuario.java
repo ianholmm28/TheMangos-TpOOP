@@ -7,13 +7,14 @@ import excepciones.UsuarioInhabilitadoException;
 import excepciones.ViajeAbiertoException;
 import viajes.Viaje;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Usuario {
+public class Usuario implements Serializable {
     private String nombre;
     private String documento;
     private String email;
@@ -68,6 +69,13 @@ public class Usuario {
         this.rehabilitar();
     }
 
+    public void recargarSaldo(double monto, MedioPago medio) throws ReglaNegocioException {
+        if (medio == null) {
+            throw new ReglaNegocioException("El medio de pago no puede ser nulo.");
+        }
+        recargarSaldo(monto, medio.getTipo(), medio.getIdentificador());
+    }
+
     public void rehabilitar() {
         if (!this.habilitado && this.cuenta.getSaldo() >= 0) {
             this.habilitado = true;
@@ -95,6 +103,12 @@ public class Usuario {
     public void agregarMediosPago(TipoMedioPago tipo, String identificador) {
         MedioPago medioPago = new MedioPago(tipo, identificador);
         this.mediosPago.add(medioPago);
+    }
+
+    public void agregarMedioPago(MedioPago medio) {
+        if (medio != null) {
+            this.mediosPago.add(medio);
+        }
     }
 
     public void quitarMedioPago(TipoMedioPago tipo, String identificador) throws ReglaNegocioException {

@@ -3,12 +3,13 @@ package vehiculos;
 import enums.EstadoVehiculo;
 import enums.TipoVehiculo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Vehiculo {
+public abstract class Vehiculo implements Serializable {
     protected String codigo;
     protected LocalDate fechaAlta;
     protected double kmRecorridos;

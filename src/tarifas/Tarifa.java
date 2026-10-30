@@ -2,9 +2,10 @@ package tarifas;
 
 import enums.TipoVehiculo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Tarifa {
+public class Tarifa implements Serializable {
 
     private TipoVehiculo tipo;
     private LocalDate vigenteDesde;

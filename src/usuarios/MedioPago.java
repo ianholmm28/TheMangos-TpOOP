@@ -1,8 +1,9 @@
 package usuarios;
 
 import enums.TipoMedioPago;
+import java.io.Serializable;
 
-public class MedioPago {
+public class MedioPago implements Serializable {
     private TipoMedioPago tipo;
     private String identificador;
 

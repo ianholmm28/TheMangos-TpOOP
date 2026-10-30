@@ -1,8 +1,9 @@
 package viajes;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class PuntoRecorrido {
+public class PuntoRecorrido implements Serializable {
     private double latitud;
     private double longitud;
     private LocalDateTime hora;

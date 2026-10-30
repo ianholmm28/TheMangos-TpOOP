@@ -1,8 +1,9 @@
 package viajes;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class NotaAjuste {
+public class NotaAjuste implements Serializable {
     private LocalDateTime fecha;
     private String motivo;
     private double importe;

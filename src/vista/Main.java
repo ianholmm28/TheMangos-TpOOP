@@ -33,6 +33,11 @@ public class Main extends Application {
         stage.setScene(scene);
     }
 
+    @Override
+    public void stop() {
+        Pantalla.getSistema().guardarDatos();
+    }
+
     public static void main(String[] args) {
         launch(args);
     }

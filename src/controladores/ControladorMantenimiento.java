@@ -86,12 +86,16 @@ public class ControladorMantenimiento {
     }
 
     public void cerrarOrden(int nroOrden, String tareas, String repuestos) throws ReglaNegocioException{
+        cerrarOrden(nroOrden, this.reloj.ahora().toLocalDate(), tareas, repuestos);
+    }
+
+    public void cerrarOrden(int nroOrden, LocalDate fecha, String tareas, String repuestos) throws ReglaNegocioException{
         OrdenMantenimiento orden = buscarOrden(nroOrden);
         if (!orden.estaAbierta()){
             throw new ReglaNegocioException("La orden número "+nroOrden+" ya se encuentra cerrada.");
         }
 
-        LocalDate fechaCierre = this.reloj.ahora().toLocalDate();
+        LocalDate fechaCierre = (fecha != null) ? fecha : this.reloj.ahora().toLocalDate();
         orden.cerrar(fechaCierre, tareas, repuestos);
         Vehiculo v = orden.getVehiculo();
         if (v instanceof Electrico && ((Electrico) v).getNivelBateria() < 15) {

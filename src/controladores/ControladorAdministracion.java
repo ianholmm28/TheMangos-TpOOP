@@ -118,8 +118,9 @@ public class ControladorAdministracion {
     }
 
     public void registrarPersonal(Personal p) throws ReglaNegocioException {
-        if (p == null) {
-            throw new ReglaNegocioException("Los datos de personal no pueden ser nulos.");
+        if (p == null || p.getLegajo() == null || p.getLegajo().trim().isEmpty()
+                || p.getNombre() == null || p.getNombre().trim().isEmpty()) {
+            throw new ReglaNegocioException("Los datos obligatorios del personal (legajo y nombre) no pueden ser vacíos.");
         }
         if (this.personal.containsKey(p.getLegajo())) {
             throw new ReglaNegocioException("Ya existe personal registrado con el legajo: " + p.getLegajo());

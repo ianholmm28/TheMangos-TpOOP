@@ -5,12 +5,13 @@ import estaciones.Estacion;
 import usuarios.Usuario;
 import vehiculos.Vehiculo;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Viaje {
+public class Viaje implements Serializable {
     private LocalDateTime inicio;
     private LocalDateTime fin;
     private double distancia;

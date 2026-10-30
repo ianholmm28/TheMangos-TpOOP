@@ -1,10 +1,11 @@
 package usuarios;
 
 import enums.TipoMovimiento;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class Cuenta {
+public class Cuenta implements Serializable {
     private double saldo;
     private List<Movimiento> movimientos;
 
@@ -17,6 +18,11 @@ public class Cuenta {
        Movimiento movimiento = new Movimiento(LocalDateTime.now(),monto,TipoMovimiento.RECARGA,concepto);
        this.saldo += monto;
        this.movimientos.add(movimiento);  
+    }
+
+    public void recargar(double monto, MedioPago medio){
+       String detalle = (medio != null) ? ("Recarga con " + medio.getTipo() + " " + medio.getIdentificador()) : "Recarga";
+       recargar(monto, detalle);
     }
     
     public void debitar(double monto,String concepto){

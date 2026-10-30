@@ -1,8 +1,9 @@
 package usuarios;
  
+import java.io.Serializable;
 import java.time.YearMonth;
 
-public class PlanMensual {
+public class PlanMensual implements Serializable {
     
     private YearMonth mes;
     private int viajesUsados;
