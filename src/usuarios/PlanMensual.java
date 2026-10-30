@@ -7,9 +7,7 @@ public class PlanMensual {
     private YearMonth mes;
     private int viajesUsados;
     public static final double COSTO_PLAN = 15000;
-    public static final double costoPlan = 15000;
     public static final int VIAJES_INCLUIDOS = 20;
-    public static final int viajesIncluidos = 20;
     private boolean renovable;
 
     public YearMonth getMes() {
@@ -17,7 +15,7 @@ public class PlanMensual {
     }
 
     public int getViajesIncluidos() {
-        return viajesIncluidos;
+        return VIAJES_INCLUIDOS;
     }
 
     public int getViajesUsados() {
@@ -25,7 +23,7 @@ public class PlanMensual {
     }
 
     public double getCostoPlan() {
-        return costoPlan;
+        return COSTO_PLAN;
     }
     
     public PlanMensual(YearMonth mes) {
@@ -35,7 +33,7 @@ public class PlanMensual {
     }
      
     public boolean tieneViajesDisponibles(){
-       return this.viajesUsados < viajesIncluidos;
+       return this.viajesUsados < VIAJES_INCLUIDOS;
     }
     
     public void registrarViaje(){

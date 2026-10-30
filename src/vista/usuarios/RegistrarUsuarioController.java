@@ -37,7 +37,6 @@ public class RegistrarUsuarioController extends Pantalla implements Initializabl
 
     @FXML
     void registrar(ActionEvent event) {
-        System.out.println("Hola, cinti le gusta la berenjena");
         // Por ahora pasa directo a la pantalla principal, sin validar datos
         try {
             Main.mostrarPantalla("principal/PantallaPrincipal.fxml");

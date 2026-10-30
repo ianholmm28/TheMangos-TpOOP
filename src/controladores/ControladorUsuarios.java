@@ -53,6 +53,14 @@ public class ControladorUsuarios {
         usuario.agregarMediosPago(medio, identificador);
     }
 
+    public void cambiarNombre(String documento, String nombre) throws ReglaNegocioException {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new ReglaNegocioException("El nombre no puede estar vacío.");
+        }
+        Usuario usuario = buscarUsuario(documento);
+        usuario.cambiarNombre(nombre.trim());
+    }
+
     public void quitarMedioPago(String documento, TipoMedioPago medio, String identificador) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
         usuario.quitarMedioPago(medio, identificador);

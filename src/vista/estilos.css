@@ -60,6 +60,50 @@
     -fx-effect: dropshadow(gaussian, rgba(22, 163, 74, 0.25), 8, 0.3, 0, 0);
 }
 
+/* ---------- Desplegables ---------- */
+.combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-borde;
+    -fx-border-radius: 10;
+    -fx-padding: 4 4;
+}
+
+.combo-box:focused {
+    -fx-border-color: -color-primario;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -color-texto;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.separator .line {
+    -fx-border-color: -color-borde;
+}
+
+/* ---------- Listas ---------- */
+.list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: -color-borde;
+    -fx-border-radius: 10;
+    -fx-padding: 4;
+}
+
+.list-view .list-cell {
+    -fx-background-color: white;
+    -fx-text-fill: -color-texto;
+    -fx-padding: 10 12;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #dcfce7;
+}
+
 /* ---------- Botones ---------- */
 .button {
     -fx-background-radius: 10;

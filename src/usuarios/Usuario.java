@@ -78,10 +78,10 @@ public class Usuario {
         if (this.plan != null && this.plan.getMes().equals(mes)) {
             throw new ReglaNegocioException("El usuario ya cuenta con un plan mensual suscrito para el mes actual.");
         }
-        if (!this.cuenta.tieneSaldo(PlanMensual.costoPlan)) {
+        if (!this.cuenta.tieneSaldo(PlanMensual.COSTO_PLAN)) {
             throw new SaldoInsuficienteException("Saldo insuficiente para el plan mensual");
         }
-        this.cuenta.debitar(PlanMensual.costoPlan, "Plan mensual " + mes);
+        this.cuenta.debitar(PlanMensual.COSTO_PLAN, "Plan mensual " + mes);
         this.plan = new PlanMensual(mes);
     }
 
@@ -113,6 +113,11 @@ public class Usuario {
     
     public void inhabilitar(){
         this.habilitado = false;
+    }
+
+    //Hay que agregarla al diagrama porque no existe
+    public void cambiarNombre(String nombre){
+        this.nombre = nombre;
     }
 
     public void iniciarViaje(Viaje viaje){
