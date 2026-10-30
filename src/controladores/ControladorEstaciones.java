@@ -29,6 +29,13 @@ public class ControladorEstaciones {
         this.reloj = reloj;
     }
 
+    public ControladorEstaciones(Map<String, Estacion> estaciones, Map<String, Operador> operadores, List<Traslado> traslados, Reloj reloj) {
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.operadores = (operadores != null) ? operadores : new HashMap<>();
+        this.traslados = (traslados != null) ? traslados : new ArrayList<>();
+        this.reloj = reloj;
+    }
+
     public Estacion registrarEstacion(String codigo, String direccion, double latitud, double longitud, Map<TipoVehiculo, Integer> capacidades) throws ReglaNegocioException{
         if (this.estaciones.containsKey(codigo)){
             throw new ReglaNegocioException("Ya existe una estación con el código: "+codigo);
@@ -44,7 +51,25 @@ public class ControladorEstaciones {
         return nuevaEstacion;
     }
 
+    public void modificarEstacion(String codigo, String nuevaDireccion, double nuevaLatitud, double nuevaLongitud, Map<TipoVehiculo, Integer> nuevasCapacidades) throws ReglaNegocioException {
+        Estacion estacion = buscarEstacion(codigo);
+        for (Map.Entry<TipoVehiculo, Integer> entrada : nuevasCapacidades.entrySet()) {
+            TipoVehiculo tipo = entrada.getKey();
+            int capacidad = entrada.getValue();
+            if (capacidad <= 0) {
+                throw new ReglaNegocioException("La capacidad para cada vehículo debe ser mayor a cero.");
+            }
+            if (capacidad < estacion.cantidadVehiculosPorTipo(tipo)) {
+                throw new ReglaNegocioException("La nueva capacidad no puede ser menor a los vehículos presentes para " + tipo);
+            }
+        }
+        estacion.modificar(nuevaDireccion, nuevaLatitud, nuevaLongitud, nuevasCapacidades);
+    }
+
     public Traslado registrarTraslado(String codOrigen, String codDestino, List<String> codVehiculos, String legajoOperador) throws ReglaNegocioException, VehiculoNoDisponibleException, EstacionLlenaException{
+        if (codVehiculos == null || codVehiculos.isEmpty()){
+            throw new ReglaNegocioException("Debe seleccionar al menos un vehículo para trasladar.");
+        }
         Estacion origen = buscarEstacion(codOrigen);
         Estacion destino = buscarEstacion(codDestino);
         Operador operador = buscarOperador(legajoOperador);

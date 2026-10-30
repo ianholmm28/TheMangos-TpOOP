@@ -47,8 +47,8 @@ public class CalculadorTarifa {
             }
         }
 
-        if (promoElegida instanceof PromocionPlanMensual){
-            viaje.getUsuario().getPlan().registrarViaje();
+        if (promoElegida != null){
+            promoElegida.aplicar(viaje);
         }
         return Math.max(0.0, base - mayorDescuento);
     }

@@ -56,4 +56,10 @@ public abstract class Vehiculo {
     public void setEstado(EstadoVehiculo estado){
         this.estado = estado;
     }
+
+    public void agregarKm(double km){
+        if (km > 0){
+            this.kmRecorridos += km;
+        }
+    }
 }
