@@ -110,7 +110,7 @@ public class RecargarSaldoController extends Pantalla implements Initializable {
     @FXML
     void volver(ActionEvent event) {
         try {
-            Main.mostrarPantalla("principal/PantallaPrincipal.fxml");
+            Main.mostrarPantalla("general/PantallaPrincipal.fxml");
         } catch (IOException e) {
             System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
         }

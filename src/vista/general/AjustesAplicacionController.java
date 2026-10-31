@@ -1,4 +1,4 @@
-package vista.principal;
+package vista.general;
 
 import enums.TipoMedioPago;
 import excepciones.ReglaNegocioException;
@@ -123,7 +123,7 @@ public class AjustesAplicacionController extends Pantalla implements Initializab
     @FXML
     void volver(ActionEvent event) {
         try {
-            Main.mostrarPantalla("principal/PantallaPrincipal.fxml");
+            Main.mostrarPantalla("general/PantallaPrincipal.fxml");
         } catch (IOException e) {
             System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
         }

@@ -1,5 +1,6 @@
 package vista.usuarios;
 
+import excepciones.UsuarioNoEncontradoException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -10,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import vista.Main;
 import vista.Pantalla;
+import vista.Sesion;
 
 /**
  * FXML Controller class
@@ -33,13 +35,27 @@ public class IniciarSesionController extends Pantalla implements Initializable {
 
     @FXML
     void ingresar(ActionEvent event) {
-        // TODO: buscar al usuario por documento
-        // Por ahora pasa directo a la pantalla principal, sin validar datos
+        String documento = txtDocumento.getText().trim();
+        if (documento.isEmpty()) {
+            mostrarMensaje("Ingresá tu documento");
+            return;
+        }
         try {
-            Main.mostrarPantalla("principal/PantallaPrincipal.fxml");
+            getControladorUsuarios().buscarUsuario(documento); 
+            Sesion.iniciar(documento);
+            Main.mostrarPantalla("general/PantallaPrincipal.fxml");
+        } catch (UsuarioNoEncontradoException e) {
+            mostrarMensaje("No existe un usuario con ese documento");
         } catch (IOException e) {
             System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
         }
+    }
+
+    private void mostrarMensaje(String texto) {
+        lblMensaje.setText(texto);
+        lblMensaje.getStyleClass().add("mensaje-error");
+        lblMensaje.setManaged(true);
+        lblMensaje.setVisible(true);
     }
 
     @FXML

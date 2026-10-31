@@ -1,4 +1,4 @@
-package vista.principal;
+package vista.general;
 
 import excepciones.UsuarioNoEncontradoException;
 import java.io.IOException;
@@ -124,7 +124,7 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
     @FXML
     void irAAjustes(ActionEvent event) {
         try {
-            Main.mostrarPantalla("principal/AjustesAplicacion.fxml");
+            Main.mostrarPantalla("general/AjustesAplicacion.fxml");
         } catch (IOException e) {
             System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
         }

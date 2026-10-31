@@ -106,7 +106,7 @@ public class ControladorUsuarios {
     public List<Movimiento> consultarMovimientos(String documento) throws UsuarioNoEncontradoException {
         Usuario usuario = buscarUsuario(documento);
         List<Movimiento> lista = new ArrayList<>(usuario.getCuenta().getMovimientos());
-        Collections.sort(lista); // Ordenados del más reciente al más antiguo
+        Collections.sort(lista);
         return lista;
     }
 

@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="fondo" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.principal.AjustesAplicacionController">
+<BorderPane styleClass="fondo" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.general.AjustesAplicacionController">
    <top>
       <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="header">
          <children>
