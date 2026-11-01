@@ -119,6 +119,6 @@ public class ControladorUsuarios {
     }
 
     public Map<String, Usuario> getUsuarios() {
-        return usuarios;
+        return new HashMap<>(this.usuarios);
     }
 }

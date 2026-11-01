@@ -115,6 +115,6 @@ public class Estacion implements Serializable {
     public String getDireccion(){return direccion;}
     public double getLatitud(){return latitud;}
     public double getLongitud(){return longitud;}
-    public Map<TipoVehiculo, Integer> getCapacidadPorTipo(){return capacidadPorTipo;}
-    public List<Vehiculo> getVehiculos(){return vehiculos;}
+    public Map<TipoVehiculo, Integer> getCapacidadPorTipo(){return new HashMap<>(this.capacidadPorTipo);}
+    public List<Vehiculo> getVehiculos(){return new ArrayList<>(this.vehiculos);}
 }

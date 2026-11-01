@@ -77,6 +77,4 @@ public class Sistema {
     public ControladorAdministracion getControladorAdministracion() { return controladorAdministracion; }
     public ControladorPersistencia getControladorPersistencia() {return controladorPersistencia;}
     public GeneradorReportes getGeneradorReportes() { return generadorReportes; }
-    public Reloj getReloj() { return reloj; }
-    public CalculadorTarifa getCalculador() { return calculador; }
 }

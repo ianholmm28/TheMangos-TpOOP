@@ -3,6 +3,7 @@ package vista;
 import controladores.ControladorAdministracion;
 import controladores.ControladorEstaciones;
 import controladores.ControladorMantenimiento;
+import controladores.ControladorPersistencia;
 import controladores.ControladorUsuarios;
 import controladores.ControladorViajes;
 import controladores.Sistema;
@@ -17,6 +18,7 @@ public abstract class Pantalla {
     public ControladorEstaciones getControladorEstaciones() {return sistema.getControladorEstaciones();}
     public ControladorMantenimiento getControladorMantenimiento() {return sistema.getControladorMantenimiento();}
     public ControladorAdministracion getControladorAdministracion() {return sistema.getControladorAdministracion();}
+    public ControladorPersistencia getControladorPersistencia() {return sistema.getControladorPersistencia();}
     public GeneradorReportes getGeneradorReportes() {return sistema.getGeneradorReportes();}
 }
 

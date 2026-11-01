@@ -163,5 +163,5 @@ public class Usuario implements Serializable {
     public String getEmail() {return email;}
     public LocalDate getFechaAlta() {return fechaAlta;}
     public boolean isHabilitado() {return habilitado;}
-    public List<MedioPago> getMediosPago() {return mediosPago;}
+    public List<MedioPago> getMediosPago() {return new ArrayList<>(this.mediosPago);}
 }
