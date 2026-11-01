@@ -35,7 +35,7 @@ public class Main extends Application {
 
     @Override
     public void stop() {
-        Pantalla.getSistema().guardarDatos();
+        Pantalla.getSistema().getControladorPersistencia().guardarDatos();
     }
 
     public static void main(String[] args) {
