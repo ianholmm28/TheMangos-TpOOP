@@ -11,6 +11,7 @@ import vehiculos.Electrico;
 import vehiculos.Vehiculo;
 import viajes.Viaje;
 
+import java.sql.Array;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,4 +196,13 @@ public class ControladorViajes {
     public void agregarUsuario(Usuario u) { this.usuarios.put(u.getDocumento(), u); }
     public void agregarEstacion(Estacion e) { this.estaciones.put(e.getCodigo(), e); }
     public List<Viaje> getViajes() { return this.viajes; }
+    public List<Viaje> getViajesUsuario(String documento){
+        List<Viaje> viajesDelUsuario = new ArrayList<>();
+        for (Viaje v : getViajes()) {
+            if (v.getUsuario().getDocumento().equals(documento)) {
+                viajesDelUsuario.add(v);
+            }
+        }
+        return viajesDelUsuario;
+    }
 }

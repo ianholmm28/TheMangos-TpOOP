@@ -91,12 +91,7 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
             tablaMovimientos.setItems(FXCollections.observableArrayList(
                     getControladorUsuarios().consultarMovimientos(documento)));
 
-            List<Viaje> viajesDelUsuario = new ArrayList<>();
-            for (Viaje v : getControladorViajes().getViajes()) {
-                if (v.getUsuario().getDocumento().equals(documento)) {
-                    viajesDelUsuario.add(v);
-                }
-            }
+            List<Viaje> viajesDelUsuario = getControladorViajes().getViajesUsuario(documento);
             tablaViajes.setItems(FXCollections.observableArrayList(viajesDelUsuario));
         } catch (UsuarioNoEncontradoException e) {
             lblBienvenida.setText("Usuario no encontrado");
