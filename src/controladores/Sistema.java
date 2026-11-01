@@ -66,8 +66,9 @@ public class Sistema {
         this.controladorEstaciones = new ControladorEstaciones(estaciones, operadores, traslados, reloj);
         this.controladorMantenimiento = new ControladorMantenimiento(vehiculos, tecnicos, ordenes, reloj);
         this.controladorAdministracion = new ControladorAdministracion(vehiculos, estaciones, personal, tecnicos, operadores, calculador);
-
         this.generadorReportes = new GeneradorReportes(viajes, vehiculos, estaciones);
+
+        this.controladorViajes.controlarViajesVencidos();
     }
 
     public ControladorUsuarios getControladorUsuarios() { return controladorUsuarios; }
