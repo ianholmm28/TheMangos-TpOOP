@@ -1,38 +1,51 @@
 package usuarios;
  
+import java.io.Serializable;
 import java.time.YearMonth;
 
-public class PlanMensual {
+public class PlanMensual implements Serializable {
     
     private YearMonth mes;
     private int viajesUsados;
-    static final double costoPlan  = 15000;
-    static final int viajesIncluidos = 20;
+    public static final double COSTO_PLAN = 15000;
+    public static final int VIAJES_INCLUIDOS = 20;
+    private boolean renovable;
 
     public YearMonth getMes() {
         return mes;
     }
 
     public int getViajesIncluidos() {
-        return viajesIncluidos;
+        return VIAJES_INCLUIDOS;
+    }
+
+    public int getViajesUsados() {
+        return viajesUsados;
     }
 
     public double getCostoPlan() {
-        return costoPlan;
+        return COSTO_PLAN;
     }
-
     
     public PlanMensual(YearMonth mes) {
         this.mes = mes;
-        this.viajesUsados = 0 ;
+        this.viajesUsados = 0;
+        this.renovable = true;
     }
      
     public boolean tieneViajesDisponibles(){
-       return this.viajesUsados < viajesIncluidos;
+       return this.viajesUsados < VIAJES_INCLUIDOS;
     }
     
     public void registrarViaje(){
-     this.viajesUsados ++;
+        this.viajesUsados++;
     }
-   
+
+    public void cancelarRenovacion() {
+        this.renovable = false;
+    }
+
+    public boolean isRenovable() {
+        return this.renovable;
+    }
 }

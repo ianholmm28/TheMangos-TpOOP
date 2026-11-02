@@ -2,6 +2,7 @@ package controladores;
 
 import enums.EstadoVehiculo;
 import enums.EstadoViaje;
+import enums.TipoVehiculo;
 import estaciones.Estacion;
 import excepciones.*;
 import reloj.Reloj;
@@ -28,6 +29,14 @@ public class ControladorViajes {
         this.usuarios = new HashMap<>();
         this.estaciones = new HashMap<>();
         this.viajes = new ArrayList<>();
+        this.calculador = calculador;
+        this.reloj = reloj;
+    }
+
+    public ControladorViajes(Map<String, Usuario> usuarios, Map<String, Estacion> estaciones, List<Viaje> viajes, CalculadorTarifa calculador, Reloj reloj) {
+        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.viajes = (viajes != null) ? viajes : new ArrayList<>();
         this.calculador = calculador;
         this.reloj = reloj;
     }
@@ -60,8 +69,8 @@ public class ControladorViajes {
             throw new ReglaNegocioException("El usuario no tiene ningún viaje en curso para cancelar.");
         }
 
-        long minutosTranscurridos = Duration.between(viaje.getInicio(), this.reloj.ahora()).toMinutes();
-        if (minutosTranscurridos > 2) {
+        long segundosTranscurridos = Duration.between(viaje.getInicio(), this.reloj.ahora()).getSeconds();
+        if (segundosTranscurridos > 120) {
             throw new ReglaNegocioException("Pasaron más de 2 minutos. No se puede cancelar, debe devolver el vehículo.");
         }
 
@@ -69,7 +78,7 @@ public class ControladorViajes {
         Vehiculo vehiculo = viaje.getVehiculo();
         vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
         viaje.getOrigen().recibir(vehiculo);
-        usuario.finalizarViaje();
+        usuario.cancelarViaje();
     }
 
     public void registrarPunto(String documento, double lat, double lon) throws ReglaNegocioException {
@@ -78,10 +87,14 @@ public class ControladorViajes {
         if (viaje == null) {
             throw new ReglaNegocioException("El usuario no tiene un viaje en curso.");
         }
-        viaje.agregarPunto(this.reloj.ahora(), lon, lat);
+        viaje.agregarPunto(lat, lon, this.reloj.ahora());
     }
 
     public Viaje devolverVehiculo(String documento, String codEstacion) throws ReglaNegocioException {
+        return devolverVehiculo(documento, codEstacion, -1);
+    }
+
+    public Viaje devolverVehiculo(String documento, String codEstacion, int nivelBateria) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
         Viaje viaje = usuario.getViajeEnCurso();
         if (viaje == null) {
@@ -92,18 +105,26 @@ public class ControladorViajes {
         Vehiculo vehiculo = viaje.getVehiculo();
 
         if (destino.estaLlenaPara(vehiculo.getTipo())) {
-            viaje.registrarIntentoEstacionLlena();
+            viaje.registrarIntentoEstacionLlena(this.reloj.ahora());
             throw new EstacionLlenaException("La estación de destino está llena. Dispone de 10 minutos sin cargo para llegar a otra.");
         }
 
         viaje.cerrar(destino, this.reloj.ahora());
         destino.recibir(vehiculo);
 
-        if (vehiculo instanceof Electrico && ((Electrico) vehiculo).getNivelBateria() < 15) {
-            vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
-        } else {
-            vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        if (nivelBateria >= 0 && vehiculo instanceof Electrico) {
+            ((Electrico) vehiculo).actualizarBateria(nivelBateria);
         }
+
+        if (vehiculo.getEstado() != EstadoVehiculo.EN_REPARACION) {
+            if (vehiculo instanceof Electrico && ((Electrico) vehiculo).getNivelBateria() < 15) {
+                vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
+            } else {
+                vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+            }
+        }
+
+        vehiculo.agregarKm(viaje.getDistancia());
 
         double importe = this.calculador.calcular(viaje);
         viaje.setImporte(importe);
@@ -116,21 +137,21 @@ public class ControladorViajes {
         return viaje;
     }
 
-    public void registrarNotaAjuste(int idViaje, String motivo, double importe) throws ReglaNegocioException {
-        if (idViaje < 0 || idViaje >= this.viajes.size()) {
+    public void registrarNotaAjuste(Viaje viaje, String motivo, double importe) throws ReglaNegocioException {
+        if (viaje == null || !this.viajes.contains(viaje)) {
             throw new ReglaNegocioException("No existe el viaje indicado.");
         }
-        Viaje viaje = this.viajes.get(idViaje);
         if (viaje.getEstado() != EstadoViaje.CERRADO) {
             throw new ReglaNegocioException("Solo se pueden aplicar notas de ajuste a viajes cerrados.");
         }
 
         viaje.agregarNotaAjuste(this.reloj.ahora(), motivo, importe);
+        viaje.getUsuario().getCuenta().ajustar(importe, "Nota de ajuste: " + motivo);
 
-        if (importe > 0) {
-            viaje.getUsuario().getCuenta().recargar(importe, "Nota de ajuste: " + motivo);
-        } else if (importe < 0) {
-            viaje.getUsuario().getCuenta().debitar(Math.abs(importe), "Nota de ajuste: " + motivo);
+        if (viaje.getUsuario().getCuenta().getSaldo() >= 0) {
+            viaje.getUsuario().rehabilitar();
+        } else {
+            viaje.getUsuario().inhabilitar();
         }
     }
 
@@ -141,9 +162,12 @@ public class ControladorViajes {
                 long horas = Duration.between(v.getInicio(), this.reloj.ahora()).toHours();
                 if (horas >= 24) {
                     v.setEstado(EstadoViaje.PERDIDO);
+                    v.setImporte(150000.0);
                     v.getVehiculo().setEstado(EstadoVehiculo.FUERA_DE_SERVICIO);
                     v.getUsuario().getCuenta().debitar(150000.0, "Cargo fijo por vehículo perdido");
-                    v.getUsuario().inhabilitar();
+                    if (v.getUsuario().getCuenta().getSaldo() < 0) {
+                        v.getUsuario().inhabilitar();
+                    }
                     v.getUsuario().finalizarViaje();
                     vencidos.add(v);
                 }
@@ -170,5 +194,24 @@ public class ControladorViajes {
 
     public void agregarUsuario(Usuario u) { this.usuarios.put(u.getDocumento(), u); }
     public void agregarEstacion(Estacion e) { this.estaciones.put(e.getCodigo(), e); }
-    public List<Viaje> getViajes() { return this.viajes; }
+    public Map<String, Estacion> getEstaciones() { return new HashMap<>(this.estaciones); }
+    public List<Estacion> getEstacionesConLugar(TipoVehiculo tipo) {
+        List<Estacion> disponibles = new ArrayList<>();
+        for (Estacion estacion : this.estaciones.values()) {
+            if (!estacion.estaLlenaPara(tipo)) {
+                disponibles.add(estacion);
+            }
+        }
+        return disponibles;
+    }
+    public List<Viaje> getViajes() { return new ArrayList<>(this.viajes); }
+    public List<Viaje> getViajesUsuario(String documento){
+        List<Viaje> viajesDelUsuario = new ArrayList<>();
+        for (Viaje v : this.viajes) {
+            if (v.getUsuario().getDocumento().equals(documento)) {
+                viajesDelUsuario.add(v);
+            }
+        }
+        return viajesDelUsuario;
+    }
 }

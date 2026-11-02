@@ -20,12 +20,22 @@ public class ControladorEstaciones {
     private Map<String, Estacion> estaciones;
     private Map<String, Operador> operadores;
     private List<Traslado> traslados;
+    private List<String> avisosAlerta;
     private Reloj reloj;
 
     public ControladorEstaciones(Reloj reloj){
         this.estaciones = new HashMap<>();
         this.operadores = new HashMap<>();
         this.traslados = new ArrayList<>();
+        this.avisosAlerta = new ArrayList<>();
+        this.reloj = reloj;
+    }
+
+    public ControladorEstaciones(Map<String, Estacion> estaciones, Map<String, Operador> operadores, List<Traslado> traslados, Reloj reloj) {
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.operadores = (operadores != null) ? operadores : new HashMap<>();
+        this.traslados = (traslados != null) ? traslados : new ArrayList<>();
+        this.avisosAlerta = new ArrayList<>();
         this.reloj = reloj;
     }
 
@@ -44,7 +54,25 @@ public class ControladorEstaciones {
         return nuevaEstacion;
     }
 
+    public void modificarEstacion(String codigo, String nuevaDireccion, double nuevaLatitud, double nuevaLongitud, Map<TipoVehiculo, Integer> nuevasCapacidades) throws ReglaNegocioException {
+        Estacion estacion = buscarEstacion(codigo);
+        for (Map.Entry<TipoVehiculo, Integer> entrada : nuevasCapacidades.entrySet()) {
+            TipoVehiculo tipo = entrada.getKey();
+            int capacidad = entrada.getValue();
+            if (capacidad <= 0) {
+                throw new ReglaNegocioException("La capacidad para cada vehículo debe ser mayor a cero.");
+            }
+            if (capacidad < estacion.cantidadVehiculosPorTipo(tipo)) {
+                throw new ReglaNegocioException("La nueva capacidad no puede ser menor a los vehículos presentes para " + tipo);
+            }
+        }
+        estacion.modificar(nuevaDireccion, nuevaLatitud, nuevaLongitud, nuevasCapacidades);
+    }
+
     public Traslado registrarTraslado(String codOrigen, String codDestino, List<String> codVehiculos, String legajoOperador) throws ReglaNegocioException, VehiculoNoDisponibleException, EstacionLlenaException{
+        if (codVehiculos == null || codVehiculos.isEmpty()){
+            throw new ReglaNegocioException("Debe seleccionar al menos un vehículo para trasladar.");
+        }
         Estacion origen = buscarEstacion(codOrigen);
         Estacion destino = buscarEstacion(codDestino);
         Operador operador = buscarOperador(legajoOperador);
@@ -107,7 +135,7 @@ public class ControladorEstaciones {
 
     private void generarAlerta(Estacion estacion){
         double porcentaje = estacion.getOcupacion() * 100;
-        System.out.println("Alerta. La estación "+estacion.getCodigo()+" se encuentra al "+porcentaje+"% de ocupación.");
+        this.avisosAlerta.add("Alerta. La estación "+estacion.getCodigo()+" se encuentra al "+porcentaje+"% de ocupación.");
     }
 
     public Estacion buscarEstacion(String codigo) throws ReglaNegocioException{
@@ -126,6 +154,8 @@ public class ControladorEstaciones {
         return operador;
     }
 
-    public Map<String, Estacion> getEstaciones(){return estaciones;}
-    public List<Traslado> getTraslados(){ return traslados;}
+    public Map<String, Estacion> getEstaciones(){return new HashMap<>(this.estaciones);}
+    public Map<String, Operador> getOperadores(){return new HashMap<>(this.operadores);}
+    public List<Traslado> getTraslados(){ return new ArrayList<>(this.traslados);}
+    public List<String> getAvisosAlerta(){ return new ArrayList<>(this.avisosAlerta);}
 }

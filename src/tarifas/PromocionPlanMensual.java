@@ -24,4 +24,11 @@ public class PromocionPlanMensual implements Promocion {
         long minutosBonificados = Math.min(viaje.getMinutosCobrables(), 30);
         return tarifa.getCargoDesbloqueo() + (minutosBonificados * tarifa.getPrecioMinuto());
     }
+
+    @Override
+    public void aplicar(Viaje viaje) {
+        if (viaje.getUsuario().getPlan() != null) {
+            viaje.getUsuario().getPlan().registrarViaje();
+        }
+    }
 }

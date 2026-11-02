@@ -47,8 +47,8 @@ public class CalculadorTarifa {
             }
         }
 
-        if (promoElegida instanceof PromocionPlanMensual){
-            viaje.getUsuario().getPlan().registrarViaje();
+        if (promoElegida != null){
+            promoElegida.aplicar(viaje);
         }
         return Math.max(0.0, base - mayorDescuento);
     }
@@ -66,5 +66,9 @@ public class CalculadorTarifa {
             throw new ReglaNegocioException("No hay tarifa vigente para "+tipo+" en fecha "+fecha);
         }
         return vigente;
+    }
+
+    public List<Tarifa> getTarifas(){
+        return new ArrayList<>(this.tarifas);
     }
 }

@@ -1,10 +1,11 @@
 package vehiculos;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class ReporteFalla {
+public class ReporteFalla implements Serializable {
     private LocalDateTime fecha;
-    String descripcion;
+    private String descripcion;
 
     public ReporteFalla(LocalDateTime fecha, String descripcion){
         this.fecha = fecha;

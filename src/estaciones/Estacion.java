@@ -3,12 +3,13 @@ package estaciones;
 import enums.TipoVehiculo;
 import vehiculos.Vehiculo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-public class Estacion {
+public class Estacion implements Serializable {
     private String codigo;
     private String direccion;
     private double latitud;
@@ -58,6 +59,23 @@ public class Estacion {
         return contador;
     }
 
+    public int cantidadVehiculosDisponiblesPorTipo(TipoVehiculo tipo){
+        int contador = 0;
+        for (Vehiculo vehiculo : this.vehiculos){
+            if (vehiculo.getTipo() == tipo && vehiculo.estaDisponible()){
+                contador++;
+            }
+        }
+        return contador;
+    }
+
+    public void modificar(String direccion, double latitud, double longitud, Map<TipoVehiculo, Integer> capacidades){
+        this.direccion = direccion;
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.capacidadPorTipo = new HashMap<>(capacidades);
+    }
+
     public int lugaresLibres(TipoVehiculo tipo){
         int capacidad = this.capacidadPorTipo.getOrDefault(tipo, 0);
         int presentes = cantidadVehiculosPorTipo(tipo);
@@ -97,6 +115,6 @@ public class Estacion {
     public String getDireccion(){return direccion;}
     public double getLatitud(){return latitud;}
     public double getLongitud(){return longitud;}
-    public Map<TipoVehiculo, Integer> getCapacidadPorTipo(){return capacidadPorTipo;}
-    public List<Vehiculo> getVehiculos(){return vehiculos;}
+    public Map<TipoVehiculo, Integer> getCapacidadPorTipo(){return new HashMap<>(this.capacidadPorTipo);}
+    public List<Vehiculo> getVehiculos(){return new ArrayList<>(this.vehiculos);}
 }

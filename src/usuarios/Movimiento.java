@@ -1,9 +1,10 @@
 package usuarios;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import enums.TipoMovimiento;
 
-public class Movimiento implements Comparable<Movimiento>{
+public class Movimiento implements Comparable<Movimiento>, Serializable {
     private LocalDateTime fecha;
     private double importe;
     private TipoMovimiento tipo;
@@ -36,6 +37,6 @@ public class Movimiento implements Comparable<Movimiento>{
 
     @Override
     public int compareTo(Movimiento otro){
-        return this.fecha.compareTo(otro.fecha);
+        return otro.fecha.compareTo(this.fecha);
     }
 }
