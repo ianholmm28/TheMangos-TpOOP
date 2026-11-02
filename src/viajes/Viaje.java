@@ -5,12 +5,13 @@ import estaciones.Estacion;
 import usuarios.Usuario;
 import vehiculos.Vehiculo;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Viaje {
+public class Viaje implements Serializable {
     private LocalDateTime inicio;
     private LocalDateTime fin;
     private double distancia;
@@ -98,6 +99,6 @@ public class Viaje {
     public Vehiculo getVehiculo() { return vehiculo; }
     public Estacion getOrigen() { return origen; }
     public Estacion getDestino() { return destino; }
-    public List<PuntoRecorrido> getPuntos() { return puntos; }
-    public List<NotaAjuste> getNotasAjuste() { return notasAjuste; }
+    public List<PuntoRecorrido> getPuntos() { return new ArrayList<>(this.puntos); }
+    public List<NotaAjuste> getNotasAjuste() { return new ArrayList<>(this.notasAjuste); }
 }

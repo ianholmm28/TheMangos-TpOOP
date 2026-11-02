@@ -20,12 +20,22 @@ public class ControladorEstaciones {
     private Map<String, Estacion> estaciones;
     private Map<String, Operador> operadores;
     private List<Traslado> traslados;
+    private List<String> avisosAlerta;
     private Reloj reloj;
 
     public ControladorEstaciones(Reloj reloj){
         this.estaciones = new HashMap<>();
         this.operadores = new HashMap<>();
         this.traslados = new ArrayList<>();
+        this.avisosAlerta = new ArrayList<>();
+        this.reloj = reloj;
+    }
+
+    public ControladorEstaciones(Map<String, Estacion> estaciones, Map<String, Operador> operadores, List<Traslado> traslados, Reloj reloj) {
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.operadores = (operadores != null) ? operadores : new HashMap<>();
+        this.traslados = (traslados != null) ? traslados : new ArrayList<>();
+        this.avisosAlerta = new ArrayList<>();
         this.reloj = reloj;
     }
 
@@ -125,7 +135,7 @@ public class ControladorEstaciones {
 
     private void generarAlerta(Estacion estacion){
         double porcentaje = estacion.getOcupacion() * 100;
-        System.out.println("Alerta. La estación "+estacion.getCodigo()+" se encuentra al "+porcentaje+"% de ocupación.");
+        this.avisosAlerta.add("Alerta. La estación "+estacion.getCodigo()+" se encuentra al "+porcentaje+"% de ocupación.");
     }
 
     public Estacion buscarEstacion(String codigo) throws ReglaNegocioException{
@@ -144,6 +154,8 @@ public class ControladorEstaciones {
         return operador;
     }
 
-    public Map<String, Estacion> getEstaciones(){return estaciones;}
-    public List<Traslado> getTraslados(){ return traslados;}
+    public Map<String, Estacion> getEstaciones(){return new HashMap<>(this.estaciones);}
+    public Map<String, Operador> getOperadores(){return new HashMap<>(this.operadores);}
+    public List<Traslado> getTraslados(){ return new ArrayList<>(this.traslados);}
+    public List<String> getAvisosAlerta(){ return new ArrayList<>(this.avisosAlerta);}
 }

@@ -67,4 +67,8 @@ public class CalculadorTarifa {
         }
         return vigente;
     }
+
+    public List<Tarifa> getTarifas(){
+        return new ArrayList<>(this.tarifas);
+    }
 }

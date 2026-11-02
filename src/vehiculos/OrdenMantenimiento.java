@@ -3,9 +3,10 @@ package vehiculos;
 import excepciones.ReglaNegocioException;
 import personal.Tecnico;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class OrdenMantenimiento {
+public class OrdenMantenimiento implements Serializable {
     private int numero;
     private LocalDate fechaApertura;
     private LocalDate fechaCierre;

@@ -10,14 +10,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import tarifas.CalculadorTarifa;
 import usuarios.Movimiento;
 
 public class ControladorUsuarios {
 
     private Map<String, Usuario> usuarios;
+    private CalculadorTarifa calculador;
 
-    public ControladorUsuarios() {
-        this.usuarios = new HashMap<>();
+    public ControladorUsuarios(Map<String, Usuario> usuarios, CalculadorTarifa calculador) {
+        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
+        this.calculador = calculador;
     }      
     
     public Usuario registrarUsuario(String nombre, String documento, String email) throws ReglaNegocioException{
@@ -25,6 +28,15 @@ public class ControladorUsuarios {
             documento == null || documento.trim().isEmpty() ||
             email == null || email.trim().isEmpty()) {
             throw new ReglaNegocioException("Los datos del usuario (nombre, documento, email) no pueden ser vacíos.");
+        }
+        if (!documento.matches("\\d+")) {
+            throw new ReglaNegocioException("El documento debe contener únicamente números.");
+        }
+        if (!nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
+            throw new ReglaNegocioException("El nombre solo puede contener letras y espacios.");
+        }
+        if (!email.contains("@")){
+            throw new ReglaNegocioException("El email ingresado no tiene un formato válido.");
         }
         if (usuarios.containsKey(documento)) {
             throw new ReglaNegocioException("Ya existe un usuario con ese documento");
@@ -42,6 +54,21 @@ public class ControladorUsuarios {
         usuario.agregarMediosPago(medio, identificador);
     }
 
+    public void cambiarNombre(String documento, String nombre) throws ReglaNegocioException {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            throw new ReglaNegocioException("El nombre no puede estar vacío.");
+        }
+        Usuario usuario = buscarUsuario(documento);
+        usuario.cambiarNombre(nombre.trim());
+    }
+
+    public void agregarMedioPago(String documento, usuarios.MedioPago medio) throws ReglaNegocioException {
+        if (medio == null) {
+            throw new ReglaNegocioException("El medio de pago no puede ser nulo.");
+        }
+        agregarMedioPago(documento, medio.getTipo(), medio.getIdentificador());
+    }
+
     public void quitarMedioPago(String documento, TipoMedioPago medio, String identificador) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
         usuario.quitarMedioPago(medio, identificador);
@@ -53,6 +80,13 @@ public class ControladorUsuarios {
         }
         Usuario usuario = buscarUsuario(documento);
         usuario.recargarSaldo(monto, medio, identificador);
+    }
+
+    public void recargarSaldo(String documento, double monto, usuarios.MedioPago medio) throws ReglaNegocioException {
+        if (medio == null) {
+            throw new ReglaNegocioException("El medio de pago no puede ser nulo.");
+        }
+        recargarSaldo(documento, medio.getTipo(), medio.getIdentificador(), monto);
     }
         
     public void suscribirPlan(String documento) throws ReglaNegocioException {
@@ -73,7 +107,7 @@ public class ControladorUsuarios {
     public List<Movimiento> consultarMovimientos(String documento) throws UsuarioNoEncontradoException {
         Usuario usuario = buscarUsuario(documento);
         List<Movimiento> lista = new ArrayList<>(usuario.getCuenta().getMovimientos());
-        Collections.sort(lista); // Ordenados del más reciente al más antiguo
+        Collections.sort(lista);
         return lista;
     }
 
@@ -86,6 +120,6 @@ public class ControladorUsuarios {
     }
 
     public Map<String, Usuario> getUsuarios() {
-        return usuarios;
+        return new HashMap<>(this.usuarios);
     }
 }

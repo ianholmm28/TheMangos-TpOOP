@@ -1,9 +1,10 @@
 package usuarios;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import enums.TipoMovimiento;
 
-public class Movimiento implements Comparable<Movimiento>{
+public class Movimiento implements Comparable<Movimiento>, Serializable {
     private LocalDateTime fecha;
     private double importe;
     private TipoMovimiento tipo;

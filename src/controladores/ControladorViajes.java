@@ -2,6 +2,7 @@ package controladores;
 
 import enums.EstadoVehiculo;
 import enums.EstadoViaje;
+import enums.TipoVehiculo;
 import estaciones.Estacion;
 import excepciones.*;
 import reloj.Reloj;
@@ -28,6 +29,14 @@ public class ControladorViajes {
         this.usuarios = new HashMap<>();
         this.estaciones = new HashMap<>();
         this.viajes = new ArrayList<>();
+        this.calculador = calculador;
+        this.reloj = reloj;
+    }
+
+    public ControladorViajes(Map<String, Usuario> usuarios, Map<String, Estacion> estaciones, List<Viaje> viajes, CalculadorTarifa calculador, Reloj reloj) {
+        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
+        this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
+        this.viajes = (viajes != null) ? viajes : new ArrayList<>();
         this.calculador = calculador;
         this.reloj = reloj;
     }
@@ -128,11 +137,10 @@ public class ControladorViajes {
         return viaje;
     }
 
-    public void registrarNotaAjuste(int idViaje, String motivo, double importe) throws ReglaNegocioException {
-        if (idViaje < 0 || idViaje >= this.viajes.size()) {
+    public void registrarNotaAjuste(Viaje viaje, String motivo, double importe) throws ReglaNegocioException {
+        if (viaje == null || !this.viajes.contains(viaje)) {
             throw new ReglaNegocioException("No existe el viaje indicado.");
         }
-        Viaje viaje = this.viajes.get(idViaje);
         if (viaje.getEstado() != EstadoViaje.CERRADO) {
             throw new ReglaNegocioException("Solo se pueden aplicar notas de ajuste a viajes cerrados.");
         }
@@ -186,5 +194,24 @@ public class ControladorViajes {
 
     public void agregarUsuario(Usuario u) { this.usuarios.put(u.getDocumento(), u); }
     public void agregarEstacion(Estacion e) { this.estaciones.put(e.getCodigo(), e); }
-    public List<Viaje> getViajes() { return this.viajes; }
+    public Map<String, Estacion> getEstaciones() { return new HashMap<>(this.estaciones); }
+    public List<Estacion> getEstacionesConLugar(TipoVehiculo tipo) {
+        List<Estacion> disponibles = new ArrayList<>();
+        for (Estacion estacion : this.estaciones.values()) {
+            if (!estacion.estaLlenaPara(tipo)) {
+                disponibles.add(estacion);
+            }
+        }
+        return disponibles;
+    }
+    public List<Viaje> getViajes() { return new ArrayList<>(this.viajes); }
+    public List<Viaje> getViajesUsuario(String documento){
+        List<Viaje> viajesDelUsuario = new ArrayList<>();
+        for (Viaje v : this.viajes) {
+            if (v.getUsuario().getDocumento().equals(documento)) {
+                viajesDelUsuario.add(v);
+            }
+        }
+        return viajesDelUsuario;
+    }
 }

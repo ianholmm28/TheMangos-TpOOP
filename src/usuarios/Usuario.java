@@ -7,13 +7,14 @@ import excepciones.UsuarioInhabilitadoException;
 import excepciones.ViajeAbiertoException;
 import viajes.Viaje;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Usuario {
+public class Usuario implements Serializable {
     private String nombre;
     private String documento;
     private String email;
@@ -68,6 +69,13 @@ public class Usuario {
         this.rehabilitar();
     }
 
+    public void recargarSaldo(double monto, MedioPago medio) throws ReglaNegocioException {
+        if (medio == null) {
+            throw new ReglaNegocioException("El medio de pago no puede ser nulo.");
+        }
+        recargarSaldo(monto, medio.getTipo(), medio.getIdentificador());
+    }
+
     public void rehabilitar() {
         if (!this.habilitado && this.cuenta.getSaldo() >= 0) {
             this.habilitado = true;
@@ -78,10 +86,10 @@ public class Usuario {
         if (this.plan != null && this.plan.getMes().equals(mes)) {
             throw new ReglaNegocioException("El usuario ya cuenta con un plan mensual suscrito para el mes actual.");
         }
-        if (!this.cuenta.tieneSaldo(PlanMensual.costoPlan)) {
+        if (!this.cuenta.tieneSaldo(PlanMensual.COSTO_PLAN)) {
             throw new SaldoInsuficienteException("Saldo insuficiente para el plan mensual");
         }
-        this.cuenta.debitar(PlanMensual.costoPlan, "Plan mensual " + mes);
+        this.cuenta.debitar(PlanMensual.COSTO_PLAN, "Plan mensual " + mes);
         this.plan = new PlanMensual(mes);
     }
 
@@ -95,6 +103,12 @@ public class Usuario {
     public void agregarMediosPago(TipoMedioPago tipo, String identificador) {
         MedioPago medioPago = new MedioPago(tipo, identificador);
         this.mediosPago.add(medioPago);
+    }
+
+    public void agregarMedioPago(MedioPago medio) {
+        if (medio != null) {
+            this.mediosPago.add(medio);
+        }
     }
 
     public void quitarMedioPago(TipoMedioPago tipo, String identificador) throws ReglaNegocioException {
@@ -113,6 +127,11 @@ public class Usuario {
     
     public void inhabilitar(){
         this.habilitado = false;
+    }
+
+    //Hay que agregarla al diagrama porque no existe
+    public void cambiarNombre(String nombre){
+        this.nombre = nombre;
     }
 
     public void iniciarViaje(Viaje viaje){
@@ -144,5 +163,5 @@ public class Usuario {
     public String getEmail() {return email;}
     public LocalDate getFechaAlta() {return fechaAlta;}
     public boolean isHabilitado() {return habilitado;}
-    public List<MedioPago> getMediosPago() {return mediosPago;}
+    public List<MedioPago> getMediosPago() {return new ArrayList<>(this.mediosPago);}
 }
