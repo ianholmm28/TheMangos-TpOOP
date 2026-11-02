@@ -18,14 +18,6 @@ public class ControladorUsuarios {
     private Map<String, Usuario> usuarios;
     private CalculadorTarifa calculador;
 
-    public ControladorUsuarios() {
-        this.usuarios = new HashMap<>();
-    }
-
-    public ControladorUsuarios(Map<String, Usuario> usuarios) {
-        this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
-    }
-
     public ControladorUsuarios(Map<String, Usuario> usuarios, CalculadorTarifa calculador) {
         this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
         this.calculador = calculador;
@@ -36,6 +28,15 @@ public class ControladorUsuarios {
             documento == null || documento.trim().isEmpty() ||
             email == null || email.trim().isEmpty()) {
             throw new ReglaNegocioException("Los datos del usuario (nombre, documento, email) no pueden ser vacíos.");
+        }
+        if (!documento.matches("\\d+")) {
+            throw new ReglaNegocioException("El documento debe contener únicamente números.");
+        }
+        if (!nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
+            throw new ReglaNegocioException("El nombre solo puede contener letras y espacios.");
+        }
+        if (!email.contains("@")){
+            throw new ReglaNegocioException("El email ingresado no tiene un formato válido.");
         }
         if (usuarios.containsKey(documento)) {
             throw new ReglaNegocioException("Ya existe un usuario con ese documento");
