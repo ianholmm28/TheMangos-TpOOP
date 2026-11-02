@@ -46,8 +46,9 @@
                   </VBox>
                   <VBox alignment="CENTER_LEFT" minWidth="320.0" spacing="12.0" styleClass="card">
                      <children>
-                        <Label styleClass="subtitulo" wrapText="true" />
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#registrarVehiculo" styleClass="boton-primario" text="Iniciar nuevo viaje" />
+                        <Label fx:id="lblEstadoViaje" styleClass="subtitulo" wrapText="true" />
+                        <Button fx:id="btnDetalleViaje" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#verDetalleViaje" styleClass="boton-secundario" text="Detalles de viaje en curso" />
+                        <Button fx:id="btnIniciarViaje" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#registrarVehiculo" styleClass="boton-primario" text="Iniciar nuevo viaje" />
                      </children>
                      <padding>
                         <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />

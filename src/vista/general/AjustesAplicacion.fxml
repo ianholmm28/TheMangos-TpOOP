@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="fondo" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.general.AjustesAplicacionController">
+<BorderPane styleClass="fondo" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.general.AjustesAplicacionController">
    <top>
       <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="header">
          <children>
@@ -48,6 +48,24 @@
                         </VBox>
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#guardarNombre" styleClass="boton-primario" text="Guardar nombre" />
                         <Label fx:id="lblMensajeNombre" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
+                        <HBox alignment="CENTER" blendMode="SRC_ATOP" prefHeight="218.0" prefWidth="457.0">
+                           <children>
+                              <Button mnemonicParsing="false" text="Button">
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" text="Button">
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" text="Button" />
+                           </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </HBox>
                      </children>
                      <padding>
                         <Insets bottom="32.0" left="32.0" right="32.0" top="32.0" />

@@ -66,4 +66,13 @@ public class IniciarSesionController extends Pantalla implements Initializable {
             System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
         }
     }
+
+    @FXML
+    void irAEstaciones(ActionEvent event) {
+        try {
+            Main.mostrarPantalla("estaciones/CrearEstacion.fxml");
+        } catch (IOException e) {
+            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
+        }
+    }
 }

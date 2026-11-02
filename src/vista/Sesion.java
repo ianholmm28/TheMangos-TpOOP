@@ -1,9 +1,5 @@
 package vista;
 
-/**
- * Guarda el documento del usuario que inicio sesion, para que las pantallas
- * sepan de quien mostrar los datos.
- */
 public class Sesion {
     private static String documento;
 

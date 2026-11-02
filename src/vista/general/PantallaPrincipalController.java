@@ -12,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -35,6 +36,12 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
     private Label lblBienvenida;
     @FXML
     private Label lblSaldo;
+    @FXML
+    private Label lblEstadoViaje;
+    @FXML
+    private Button btnDetalleViaje;
+    @FXML
+    private Button btnIniciarViaje;
 
     @FXML
     private TableView<Viaje> tablaViajes;
@@ -88,6 +95,16 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
             lblBienvenida.setText("Hola, " + usuario.getNombre());
             lblSaldo.setText(formatearPlata(usuario.getCuenta().getSaldo()));
 
+            // Si hay un viaje en curso se puede ver su detalle, si no se puede iniciar uno nuevo
+            Viaje enCurso = usuario.getViajeEnCurso();
+            btnDetalleViaje.setDisable(enCurso == null);
+            btnIniciarViaje.setDisable(enCurso != null);
+            if (enCurso == null) {
+                lblEstadoViaje.setText("No tenés ningún viaje en curso");
+            } else {
+                lblEstadoViaje.setText("Estás viajando con el vehículo " + enCurso.getVehiculo().getCodigo());
+            }
+
             tablaMovimientos.setItems(FXCollections.observableArrayList(
                     getControladorUsuarios().consultarMovimientos(documento)));
 
@@ -113,7 +130,20 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
 
     @FXML
     void registrarVehiculo(ActionEvent event) {
-        // TODO
+        try {
+            Main.mostrarPantalla("general/PantallaViaje.fxml");
+        } catch (IOException e) {
+            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void verDetalleViaje(ActionEvent event) {
+        try {
+            Main.mostrarPantalla("general/DetalleViaje.fxml");
+        } catch (IOException e) {
+            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
+        }
     }
 
     @FXML
