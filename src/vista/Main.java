@@ -31,7 +31,7 @@ public class Main extends Application {
 
     // Carga la tarifa fija para cada tipo de vehiculo si todavia no tiene una
     private void cargarTarifaFija() {
-        CalculadorTarifa calculador = Pantalla.getSistema().getCalculador();
+        CalculadorTarifa calculador = Pantalla.getSistema().getControladorAdministracion().getCalculador();
         for (TipoVehiculo tipo : TipoVehiculo.values()) {
             boolean tieneTarifa = false;
             for (Tarifa tarifa : calculador.getTarifas()) {
@@ -55,7 +55,7 @@ public class Main extends Application {
 
     @Override
     public void stop() {
-        Pantalla.getSistema().guardarDatos();
+        Pantalla.getSistema().getControladorPersistencia().guardarDatos();
     }
 
     public static void main(String[] args) {

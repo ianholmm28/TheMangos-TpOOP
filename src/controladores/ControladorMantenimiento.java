@@ -20,22 +20,16 @@ public class ControladorMantenimiento {
     private Map<String, Vehiculo> vehiculos;
     private Map<String, Tecnico> tecnicos;
     private List<OrdenMantenimiento> ordenes;
+    private List<String> notificaciones;
     private Reloj reloj;
     private int proximoNumeroOrden;
-
-    public ControladorMantenimiento(Reloj reloj){
-        this.reloj = reloj;
-        this.vehiculos = new HashMap<>();
-        this.tecnicos = new HashMap<>();
-        this.ordenes = new ArrayList<>();
-        this.proximoNumeroOrden = 1;
-    }
 
     public ControladorMantenimiento(Map<String, Vehiculo> vehiculos, Map<String, Tecnico> tecnicos, List<OrdenMantenimiento> ordenes, Reloj reloj) {
         this.reloj = reloj;
         this.vehiculos = (vehiculos != null) ? vehiculos : new HashMap<>();
         this.tecnicos = (tecnicos != null) ? tecnicos : new HashMap<>();
         this.ordenes = (ordenes != null) ? ordenes : new ArrayList<>();
+        this.notificaciones = new ArrayList<>();
         this.proximoNumeroOrden = this.ordenes.size() + 1;
     }
 
@@ -58,7 +52,7 @@ public class ControladorMantenimiento {
     }
 
     public void notificarOperador(Vehiculo vehiculo){
-        System.out.println("El vehículo "+vehiculo.getCodigo()+" acumuló 3 fallas en 30 días y pasó a EN_REPARACIÓN.");
+        this.notificaciones.add("El vehículo " + vehiculo.getCodigo() + " acumuló 3 fallas en 30 días y pasó a EN_REPARACIÓN.");
     }
 
     public OrdenMantenimiento generarOrden(String codVehiculo, String legajoTecnico) throws ReglaNegocioException{
@@ -105,14 +99,15 @@ public class ControladorMantenimiento {
         }
     }
 
-    public void registrarCarga(Electrico vehiculo, int nuevoNivel) throws ReglaNegocioException{
-        if (vehiculo == null) {
-            throw new ReglaNegocioException("El vehículo eléctrico no puede ser nulo.");
+    public void registrarCarga(String codVehiculo, int nuevoNivel) throws ReglaNegocioException{
+        Vehiculo vehiculo = buscarVehiculo(codVehiculo);
+        if (!(vehiculo instanceof Electrico)) {
+            throw new ReglaNegocioException("El vehículo " + codVehiculo + " no es eléctrico.");
         }
         if (nuevoNivel < 0 || nuevoNivel > 100) {
             throw new ReglaNegocioException("El nivel de batería debe estar entre 0 y 100.");
         }
-        vehiculo.actualizarBateria(nuevoNivel);
+        ((Electrico) vehiculo).actualizarBateria(nuevoNivel);
     }
 
     public Vehiculo buscarVehiculo(String codigo) throws VehiculoNoEncontradoException{
@@ -147,5 +142,8 @@ public class ControladorMantenimiento {
     public void agregarTecnico(Tecnico tecnico) {
         this.tecnicos.put(tecnico.getLegajo(), tecnico);
     }
-    public List<OrdenMantenimiento> getOrdenes() {return ordenes;}
+    public List<OrdenMantenimiento> getOrdenes() {return new ArrayList<>(this.ordenes);}
+    public Map<String, Vehiculo> getVehiculos(){return new HashMap<>(this.vehiculos);}
+    public Map<String, Tecnico> getTecnicos(){return new HashMap<>(this.tecnicos);}
+    public List<String> getNotificaciones(){return new ArrayList<>(this.notificaciones);}
 }

@@ -161,8 +161,8 @@ public class ControladorAdministracion {
     }
 
     public void agregarEstacion(Estacion e) { this.estaciones.put(e.getCodigo(), e); }
-    public Map<String, Vehiculo> getVehiculos() { return vehiculos; }
-    public Map<String, Estacion> getEstaciones() { return estaciones; }
-    public Map<String, Personal> getPersonal() { return personal; }
+    public Map<String, Vehiculo> getVehiculos() { return new HashMap<>(this.vehiculos); }
+    public Map<String, Estacion> getEstaciones() { return new HashMap<>(this.estaciones); }
+    public Map<String, Personal> getPersonal() { return new HashMap<>(this.personal); }
     public CalculadorTarifa getCalculador() { return calculador; }
 }

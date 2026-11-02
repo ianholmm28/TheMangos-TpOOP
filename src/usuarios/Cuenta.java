@@ -3,6 +3,7 @@ package usuarios;
 import enums.TipoMovimiento;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Cuenta implements Serializable {
@@ -45,7 +46,5 @@ public class Cuenta implements Serializable {
         return saldo;
     }
     
-    public List<Movimiento> getMovimientos() {
-        return movimientos;
-    }
+    public List<Movimiento> getMovimientos(){return new ArrayList<>(this.movimientos);}
 }

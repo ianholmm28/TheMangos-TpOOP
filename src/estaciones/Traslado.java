@@ -26,7 +26,7 @@ public class Traslado implements Serializable {
 
     public Estacion getOrigen() { return origen; }
     public Estacion getDestino() { return destino; }
-    public List<Vehiculo> getVehiculos() { return vehiculos; }
+    public List<Vehiculo> getVehiculos() { return new ArrayList<>(this.vehiculos); }
     public Operador getOperador() { return operador; }
     public LocalDateTime getFecha() { return fecha; }
 }

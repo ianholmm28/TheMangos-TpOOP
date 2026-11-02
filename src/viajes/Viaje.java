@@ -99,6 +99,6 @@ public class Viaje implements Serializable {
     public Vehiculo getVehiculo() { return vehiculo; }
     public Estacion getOrigen() { return origen; }
     public Estacion getDestino() { return destino; }
-    public List<PuntoRecorrido> getPuntos() { return puntos; }
-    public List<NotaAjuste> getNotasAjuste() { return notasAjuste; }
+    public List<PuntoRecorrido> getPuntos() { return new ArrayList<>(this.puntos); }
+    public List<NotaAjuste> getNotasAjuste() { return new ArrayList<>(this.notasAjuste); }
 }
