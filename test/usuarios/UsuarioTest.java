@@ -1,4 +1,5 @@
 package usuarios;
+
 import enums.TipoMedioPago;
 import excepciones.ReglaNegocioException;
 import excepciones.SaldoInsuficienteException;
@@ -19,7 +20,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-
 public class UsuarioTest {
     private Usuario usuario;
     private static final YearMonth MES = YearMonth.of(2026, 10);
@@ -28,6 +28,7 @@ public class UsuarioTest {
     void CrearUsuario() {
         usuario = new Usuario("Juan Pereira", "11111111", "juan@gmail.com");
     }
+
 
     @Test
     void CargarSaldoYSuscribirseAUnPlan() throws Exception {
@@ -41,7 +42,7 @@ public class UsuarioTest {
         usuario.suscribirPlan(MES);
         // verifico que se creo el plan y que se cobro correctamente el plan
         assertNotNull(usuario.getPlan());
-        assertEquals(20000 - PlanMensual.costoPlan, usuario.getCuenta().getSaldo(), 0.001);
+        assertEquals(20000 - PlanMensual.COSTO_PLAN, usuario.getCuenta().getSaldo(), 0.001);
     }
 
     @Test
@@ -51,6 +52,7 @@ public class UsuarioTest {
         //verifico que el usuario no tenga ningun plan
         assertNull(usuario.getPlan());
     }
+
 
     @Test
     void RecargarSaldoConTarjetaQueNoExiste() {
@@ -63,6 +65,7 @@ public class UsuarioTest {
 
         assertTrue(usuario.getCuenta().getMovimientos().isEmpty());
     }
+
     @Test
     void verificarHabilitacionUsuarioInhabilitadolanzaExcepcion() {
         //ihabilito al usuario
@@ -70,6 +73,7 @@ public class UsuarioTest {
         // verifico que el programa tire una excepcion al verificar al usuario ihabilitado
         assertThrows(UsuarioInhabilitadoException.class, () -> usuario.verificarHabilitacion(0));
     }
+
 
     @Test
     void RecargarSaldoUsuarioInhabilitadoQuedaRehabilitado() throws Exception {
@@ -83,6 +87,7 @@ public class UsuarioTest {
         assertDoesNotThrow(() -> usuario.verificarHabilitacion(0));
     }
 
+
     @Test
     void IniciarViajeGuardaElViajeEnCurso() {
         // creo un viaje fantasma con mock
@@ -92,8 +97,10 @@ public class UsuarioTest {
         // verifico que el usuario tenga guardado el viaje
         assertSame(viaje, usuario.getViajeEnCurso());
     }
+
+
     @Test
-    void rehabilitar_conSaldoNegativo_siguieInhabilitado() {
+    void rehabilitarconSaldoNegativoSigueInhabilitado() {
         // le pongo una multa al usuario
         usuario.getCuenta().debitar(100, "multa");// saldo -100
         // inhabilito al usuario
