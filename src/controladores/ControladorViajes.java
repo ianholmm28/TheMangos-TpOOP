@@ -56,6 +56,7 @@ public class ControladorViajes {
         vehiculo.setEstado(EstadoVehiculo.EN_USO);
 
         Viaje nuevoViaje = new Viaje(usuario, vehiculo, estacion, this.reloj.ahora());
+        nuevoViaje.agregarPunto(estacion.getLatitud(), estacion.getLongitud(), this.reloj.ahora());
         usuario.iniciarViaje(nuevoViaje);
         this.viajes.add(nuevoViaje);
 
@@ -109,11 +110,19 @@ public class ControladorViajes {
             throw new EstacionLlenaException("La estación de destino está llena. Dispone de 10 minutos sin cargo para llegar a otra.");
         }
 
+        viaje.agregarPunto(destino.getLatitud(), destino.getLongitud(), this.reloj.ahora());
         viaje.cerrar(destino, this.reloj.ahora());
         destino.recibir(vehiculo);
 
-        if (nivelBateria >= 0 && vehiculo instanceof Electrico) {
-            ((Electrico) vehiculo).actualizarBateria(nivelBateria);
+        if (vehiculo instanceof Electrico electrico) {
+            if (nivelBateria >= 0) {
+                electrico.actualizarBateria(nivelBateria);
+            } else {
+                double autonomiaKm = (vehiculo instanceof vehiculos.BicicletaElectrica bici) ? bici.getAutonomia() : 25.0;
+                int porcentajeGastado = (int) Math.ceil((viaje.getDistancia() / autonomiaKm) * 100.0);
+                int nuevaBateria = Math.max(0, electrico.getNivelBateria() - porcentajeGastado);
+                electrico.actualizarBateria(nuevaBateria);
+            }
         }
 
         if (vehiculo.getEstado() != EstadoVehiculo.EN_REPARACION) {
