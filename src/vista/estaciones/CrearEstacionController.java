@@ -3,7 +3,6 @@ package vista.estaciones;
 import enums.TipoVehiculo;
 import estaciones.Estacion;
 import excepciones.ReglaNegocioException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,20 +10,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
-import vehiculos.Electrico;
 import vehiculos.Vehiculo;
-import vista.Main;
+import vista.Formato;
 import vista.Pantalla;
 
 /**
@@ -52,35 +48,16 @@ public class CrearEstacionController extends Pantalla implements Initializable {
     @FXML
     private Label lblMensajeEstacion;
 
-    // Tabla de estaciones
+    // Lista de estaciones: un texto por estacion; en estacionesMostradas estan las estaciones en el mismo orden
     @FXML
-    private TableView<Estacion> tablaEstaciones;
-    @FXML
-    private TableColumn<Estacion, String> colEstCodigo;
-    @FXML
-    private TableColumn<Estacion, String> colEstDireccion;
-    @FXML
-    private TableColumn<Estacion, String> colEstBicis;
-    @FXML
-    private TableColumn<Estacion, String> colEstBiciElec;
-    @FXML
-    private TableColumn<Estacion, String> colEstMonopatines;
-    @FXML
-    private TableColumn<Estacion, String> colEstOcupacion;
+    private ListView<String> lstEstaciones;
+    private List<Estacion> estacionesMostradas = new ArrayList<>();
 
     // Vehiculos de la estacion seleccionada
     @FXML
     private Label lblVehiculosDe;
     @FXML
-    private TableView<Vehiculo> tablaVehiculos;
-    @FXML
-    private TableColumn<Vehiculo, String> colVehCodigo;
-    @FXML
-    private TableColumn<Vehiculo, String> colVehTipo;
-    @FXML
-    private TableColumn<Vehiculo, String> colVehEstado;
-    @FXML
-    private TableColumn<Vehiculo, String> colVehBateria;
+    private ListView<String> lstVehiculos;
     @FXML
     private ComboBox<TipoVehiculo> cmbTipoVehiculo;
     @FXML
@@ -93,24 +70,11 @@ public class CrearEstacionController extends Pantalla implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Columnas de estaciones: "presentes / capacidad" por tipo
-        colEstCodigo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCodigo()));
-        colEstDireccion.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDireccion()));
-        colEstBicis.setCellValueFactory(c -> new SimpleStringProperty(ocupacionTipo(c.getValue(), TipoVehiculo.BICICLETA_COMUN)));
-        colEstBiciElec.setCellValueFactory(c -> new SimpleStringProperty(ocupacionTipo(c.getValue(), TipoVehiculo.BICICLETA_ELECTRICA)));
-        colEstMonopatines.setCellValueFactory(c -> new SimpleStringProperty(ocupacionTipo(c.getValue(), TipoVehiculo.MONOPATIN_ELECTRICO)));
-        colEstOcupacion.setCellValueFactory(c -> new SimpleStringProperty(Math.round(c.getValue().getOcupacion() * 100) + "%"));
-
-        colVehCodigo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCodigo()));
-        colVehTipo.setCellValueFactory(c -> new SimpleStringProperty(nombreTipo(c.getValue().getTipo())));
-        colVehEstado.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getEstado().toString()));
-        colVehBateria.setCellValueFactory(c -> new SimpleStringProperty(bateria(c.getValue())));
-
         cmbTipoVehiculo.setItems(FXCollections.observableArrayList(TipoVehiculo.values()));
         cmbTipoVehiculo.setConverter(new StringConverter<TipoVehiculo>() {
             @Override
             public String toString(TipoVehiculo tipo) {
-                return tipo == null ? "" : nombreTipo(tipo);
+                return tipo == null ? "" : Formato.nombreTipo(tipo);
             }
 
             @Override
@@ -120,30 +84,51 @@ public class CrearEstacionController extends Pantalla implements Initializable {
         });
 
         // Al seleccionar una estacion se muestran sus vehiculos
-        tablaEstaciones.getSelectionModel().selectedItemProperty().addListener((obs, anterior, nueva) -> mostrarVehiculos(nueva));
+        lstEstaciones.getSelectionModel().selectedIndexProperty().addListener((obs, anterior, nuevo) -> mostrarVehiculos(estacionElegida()));
 
         cargarEstaciones();
     }
 
+    // Un renglon por estacion: "E01 - Av. Corrientes 1234  |  Bicis 3/10  ·  Bici eléc. 1/5  ·  Monopatines 0/5  |  Ocupación 20%"
     private void cargarEstaciones() {
-        Estacion seleccionada = tablaEstaciones.getSelectionModel().getSelectedItem();
-        List<Estacion> estaciones = new ArrayList<>(getControladorEstaciones().getEstaciones().values());
-        estaciones.sort(Comparator.comparing(Estacion::getCodigo));
-        tablaEstaciones.setItems(FXCollections.observableArrayList(estaciones));
-        if (seleccionada != null) {
-            tablaEstaciones.getSelectionModel().select(seleccionada);
+        lstEstaciones.getItems().clear();
+        estacionesMostradas = new ArrayList<>(getControladorEstaciones().getEstaciones().values());
+        estacionesMostradas.sort(Comparator.comparing(Estacion::getCodigo));
+        for (Estacion estacion : estacionesMostradas) {
+            lstEstaciones.getItems().add(estacion.getCodigo() + " - " + estacion.getDireccion()
+                    + "  |  Bicis " + ocupacionTipo(estacion, TipoVehiculo.BICICLETA_COMUN)
+                    + "  ·  Bici eléc. " + ocupacionTipo(estacion, TipoVehiculo.BICICLETA_ELECTRICA)
+                    + "  ·  Monopatines " + ocupacionTipo(estacion, TipoVehiculo.MONOPATIN_ELECTRICO)
+                    + "  |  Ocupación " + Math.round(estacion.getOcupacion() * 100) + "%");
         }
-        tablaEstaciones.refresh();
     }
 
+    // Vuelve a armar la lista y deja seleccionada la estacion indicada
+    private void cargarEstacionesYSeleccionar(Estacion estacion) {
+        cargarEstaciones();
+        lstEstaciones.getSelectionModel().select(estacionesMostradas.indexOf(estacion));
+    }
+
+    // Devuelve la estacion del renglon seleccionado, o null si no hay ninguna elegida
+    private Estacion estacionElegida() {
+        int indice = lstEstaciones.getSelectionModel().getSelectedIndex();
+        if (indice < 0) {
+            return null;
+        }
+        return estacionesMostradas.get(indice);
+    }
+
+    // Un renglon por vehiculo: "M001  -  Monopatín eléctrico  -  DISPONIBLE  -  Batería 100%"
     private void mostrarVehiculos(Estacion estacion) {
+        lstVehiculos.getItems().clear();
         if (estacion == null) {
             lblVehiculosDe.setText("Vehículos de la estación");
-            tablaVehiculos.getItems().clear();
             return;
         }
         lblVehiculosDe.setText("Vehículos de " + estacion.getCodigo() + " - " + estacion.getDireccion());
-        tablaVehiculos.setItems(FXCollections.observableArrayList(estacion.getVehiculos()));
+        for (Vehiculo vehiculo : estacion.getVehiculos()) {
+            lstVehiculos.getItems().add(Formato.vehiculo(vehiculo));
+        }
     }
 
     @FXML
@@ -151,7 +136,7 @@ public class CrearEstacionController extends Pantalla implements Initializable {
         String codigo = txtCodigo.getText().trim();
         String direccion = txtDireccion.getText().trim();
         if (codigo.isEmpty() || direccion.isEmpty()) {
-            mostrarMensaje(lblMensajeEstacion, "Completá el código y la dirección", false);
+            mostrarError(lblMensajeEstacion, "Completá el código y la dirección");
             return;
         }
         try {
@@ -164,41 +149,39 @@ public class CrearEstacionController extends Pantalla implements Initializable {
             capacidades.put(TipoVehiculo.MONOPATIN_ELECTRICO, leerEntero(txtCapMonopatin, "monopatines"));
 
             Estacion nueva = getControladorEstaciones().registrarEstacion(codigo, direccion, latitud, longitud, capacidades);
-            mostrarMensaje(lblMensajeEstacion, "Estación " + codigo + " creada", true);
+            mostrarExito(lblMensajeEstacion, "Estación " + codigo + " creada");
             limpiarFormulario();
-            cargarEstaciones();
-            tablaEstaciones.getSelectionModel().select(nueva);
+            cargarEstacionesYSeleccionar(nueva);
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensajeEstacion, e.getMessage(), false);
+            mostrarError(lblMensajeEstacion, e.getMessage());
         }
     }
 
     @FXML
     void agregarVehiculo(ActionEvent event) {
-        Estacion estacion = tablaEstaciones.getSelectionModel().getSelectedItem();
+        Estacion estacion = estacionElegida();
         TipoVehiculo tipo = cmbTipoVehiculo.getValue();
         String codigo = txtCodigoVehiculo.getText().trim();
         if (estacion == null) {
-            mostrarMensaje(lblMensajeVehiculo, "Seleccioná una estación de la tabla", false);
+            mostrarError(lblMensajeVehiculo, "Seleccioná una estación de la lista");
             return;
         }
         if (tipo == null) {
-            mostrarMensaje(lblMensajeVehiculo, "Elegí el tipo de vehículo", false);
+            mostrarError(lblMensajeVehiculo, "Elegí el tipo de vehículo");
             return;
         }
         if (codigo.isEmpty()) {
-            mostrarMensaje(lblMensajeVehiculo, "Ingresá el código del vehículo", false);
+            mostrarError(lblMensajeVehiculo, "Ingresá el código del vehículo");
             return;
         }
         try {
             // Sin datos extra: el controlador usa los valores por defecto (rodado, bateria, etc.)
             getControladorAdministracion().altaVehiculo(tipo, codigo, null, estacion.getCodigo());
-            mostrarMensaje(lblMensajeVehiculo, nombreTipo(tipo) + " " + codigo + " agregado a " + estacion.getCodigo(), true);
+            mostrarExito(lblMensajeVehiculo, Formato.nombreTipo(tipo) + " " + codigo + " agregado a " + estacion.getCodigo());
             txtCodigoVehiculo.clear();
-            cargarEstaciones();
-            mostrarVehiculos(estacion);
+            cargarEstacionesYSeleccionar(estacion);
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensajeVehiculo, e.getMessage(), false);
+            mostrarError(lblMensajeVehiculo, e.getMessage());
         }
     }
 
@@ -232,40 +215,9 @@ public class CrearEstacionController extends Pantalla implements Initializable {
         return estacion.cantidadVehiculosPorTipo(tipo) + " / " + estacion.getCapacidadPorTipo().getOrDefault(tipo, 0);
     }
 
-    private String nombreTipo(TipoVehiculo tipo) {
-        switch (tipo) {
-            case BICICLETA_COMUN:
-                return "Bicicleta";
-            case BICICLETA_ELECTRICA:
-                return "Bicicleta eléctrica";
-            case MONOPATIN_ELECTRICO:
-                return "Monopatín eléctrico";
-            default:
-                return tipo.toString();
-        }
-    }
-
-    private String bateria(Vehiculo vehiculo) {
-        if (vehiculo instanceof Electrico) {
-            return ((Electrico) vehiculo).getNivelBateria() + "%";
-        }
-        return "-";
-    }
-
-    private void mostrarMensaje(Label label, String texto, boolean exito) {
-        label.setText(texto);
-        label.getStyleClass().removeAll("mensaje-error", "mensaje-exito");
-        label.getStyleClass().add(exito ? "mensaje-exito" : "mensaje-error");
-        label.setManaged(true);
-        label.setVisible(true);
-    }
-
-    @FXML
-    void volver(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("usuarios/IniciarSesion.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
+    // Solo el administrador entra a estaciones: volver lo lleva a su panel
+    @Override
+    public void volver(ActionEvent event) {
+        irA("administracion/PanelAdministrador.fxml");
     }
 }

@@ -13,32 +13,52 @@
    <children>
       <VBox maxHeight="-Infinity" maxWidth="420.0" spacing="18.0" styleClass="card">
          <children>
-            <VBox spacing="6.0">
+            <!-- Paso 1: elegir como se ingresa -->
+            <VBox fx:id="panelRoles" spacing="18.0">
                <children>
-                  <Label styleClass="titulo" text="Iniciar sesión" />
-                  <Label styleClass="subtitulo" text="Ingresá con tu documento para retirar un vehículo" wrapText="true" />
+                  <VBox spacing="6.0">
+                     <children>
+                        <Label styleClass="titulo" text="Iniciar sesión" />
+                        <Label styleClass="subtitulo" text="¿Cómo querés ingresar?" wrapText="true" />
+                     </children>
+                  </VBox>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#elegirUsuario" styleClass="boton-primario" text="Usuario" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#elegirOperador" styleClass="boton-secundario" text="Operador" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#elegirTecnico" styleClass="boton-secundario" text="Técnico" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#elegirAdministrador" styleClass="boton-secundario" text="Administrador" />
+                  <HBox alignment="CENTER" spacing="4.0">
+                     <children>
+                        <Label styleClass="pie" text="¿No tenés cuenta?" />
+                        <Hyperlink onAction="#irARegistro" styleClass="link" text="Crear cuenta" />
+                     </children>
+                  </HBox>
                </children>
             </VBox>
-            <VBox spacing="6.0">
+
+            <!-- Paso 2: documento (usuario) o legajo (personal) -->
+            <VBox fx:id="panelIngreso" managed="false" spacing="18.0" visible="false">
                <children>
-                  <Label styleClass="campo-label" text="Documento" />
-                  <TextField fx:id="txtDocumento" promptText="Ej: 40123456" />
+                  <VBox spacing="6.0">
+                     <children>
+                        <Label fx:id="lblTitulo" styleClass="titulo" text="Ingresar" />
+                        <Label fx:id="lblSubtitulo" styleClass="subtitulo" wrapText="true" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="6.0">
+                     <children>
+                        <Label fx:id="lblCampo" styleClass="campo-label" text="Documento" />
+                        <TextField fx:id="txtDocumento" promptText="Ej: 40123456" />
+                     </children>
+                  </VBox>
+                  <Button fx:id="btnIngresar" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#ingresar" styleClass="boton-primario" text="Ingresar" />
+                  <Label fx:id="lblMensaje" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Hyperlink onAction="#volverARoles" styleClass="link" text="← Cambiar tipo de ingreso" />
+                     </children>
+                  </HBox>
                </children>
             </VBox>
-            <Button fx:id="btnIngresar" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#ingresar" styleClass="boton-primario" text="Ingresar" />
-            <Label fx:id="lblMensaje" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
-            <HBox alignment="CENTER" spacing="4.0">
-               <children>
-                  <Label styleClass="pie" text="¿No tenés cuenta?" />
-                  <Hyperlink onAction="#irARegistro" styleClass="link" text="Crear cuenta" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" spacing="4.0">
-               <children>
-                  <Label styleClass="pie" text="¿Sos del personal?" />
-                  <Hyperlink onAction="#irAEstaciones" styleClass="link" text="Gestionar estaciones" />
-               </children>
-            </HBox>
          </children>
          <padding>
             <Insets bottom="36.0" left="36.0" right="36.0" top="36.0" />

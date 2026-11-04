@@ -2,7 +2,6 @@ package vista.usuarios;
 
 import excepciones.ReglaNegocioException;
 import excepciones.UsuarioNoEncontradoException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -16,7 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 import usuarios.MedioPago;
 import usuarios.Usuario;
-import vista.Main;
+import vista.Formato;
 import vista.Pantalla;
 import vista.Sesion;
 
@@ -67,7 +66,7 @@ public class RecargarSaldoController extends Pantalla implements Initializable {
         try {
             Usuario usuario = getControladorUsuarios().buscarUsuario(Sesion.getDocumento());
             lblBienvenida.setText("Hola, " + usuario.getNombre());
-            lblSaldo.setText(formatearPlata(usuario.getCuenta().getSaldo()));
+            lblSaldo.setText(Formato.plata(usuario.getCuenta().getSaldo()));
 
             MedioPago seleccionado = cmbMedioPago.getValue();
             cmbMedioPago.setItems(FXCollections.observableArrayList(usuario.getMediosPago()));
@@ -85,19 +84,19 @@ public class RecargarSaldoController extends Pantalla implements Initializable {
     void recargarSaldo(ActionEvent event) {
         MedioPago medio = cmbMedioPago.getValue();
         if (medio == null) {
-            mostrarMensaje("Elegí un medio de pago", true);
+            mostrarError(lblMensaje, "Elegí un medio de pago");
             return;
         }
         try {
             double monto = Double.parseDouble(txtMonto.getText().trim().replace(",", "."));
             getControladorUsuarios().recargarSaldo(Sesion.getDocumento(), medio.getTipo(), medio.getIdentificador(), monto);
-            mostrarMensaje("Se cargaron " + formatearPlata(monto) + " con " + medio.getTipo() + " " + medio.getIdentificador(), false);
+            mostrarExito(lblMensaje, "Se cargaron " + Formato.plata(monto) + " con " + medio.getTipo() + " " + medio.getIdentificador());
             txtMonto.clear();
             cargarDatos();
         } catch (NumberFormatException e) {
-            mostrarMensaje("Ingresá un monto válido, por ejemplo 5000", true);
+            mostrarError(lblMensaje, "Ingresá un monto válido, por ejemplo 5000");
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(e.getMessage(), true);
+            mostrarError(lblMensaje, e.getMessage());
         }
     }
 
@@ -105,36 +104,5 @@ public class RecargarSaldoController extends Pantalla implements Initializable {
     @FXML
     void montoRapido(ActionEvent event) {
         txtMonto.setText(((Node) event.getSource()).getUserData().toString());
-    }
-
-    @FXML
-    void volver(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("general/PantallaPrincipal.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void cerrarSesion(ActionEvent event) {
-        Sesion.cerrar();
-        try {
-            Main.mostrarPantalla("usuarios/IniciarSesion.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
-    }
-
-    private void mostrarMensaje(String texto, boolean esError) {
-        lblMensaje.setText(texto);
-        lblMensaje.getStyleClass().removeAll("mensaje-error", "mensaje-exito");
-        lblMensaje.getStyleClass().add(esError ? "mensaje-error" : "mensaje-exito");
-        lblMensaje.setManaged(true);
-        lblMensaje.setVisible(true);
-    }
-
-    private String formatearPlata(double monto) {
-        return String.format("$ %,.2f", monto);
     }
 }

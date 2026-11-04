@@ -3,7 +3,6 @@ package vista.general;
 import enums.TipoMedioPago;
 import excepciones.ReglaNegocioException;
 import excepciones.UsuarioNoEncontradoException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -17,7 +16,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import usuarios.MedioPago;
 import usuarios.Usuario;
-import vista.Main;
 import vista.Pantalla;
 import vista.Sesion;
 
@@ -84,10 +82,10 @@ public class AjustesAplicacionController extends Pantalla implements Initializab
     void guardarNombre(ActionEvent event) {
         try {
             getControladorUsuarios().cambiarNombre(Sesion.getDocumento(), txtNombre.getText());
-            mostrarMensaje(lblMensajeNombre, "Nombre actualizado", false);
+            mostrarExito(lblMensajeNombre, "Nombre actualizado");
             cargarDatos();
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensajeNombre, e.getMessage(), true);
+            mostrarError(lblMensajeNombre, e.getMessage());
         }
     }
 
@@ -95,12 +93,12 @@ public class AjustesAplicacionController extends Pantalla implements Initializab
     void agregarMedioPago(ActionEvent event) {
         try {
             getControladorUsuarios().agregarMedioPago(Sesion.getDocumento(), cmbTipo.getValue(), txtIdentificador.getText().trim());
-            mostrarMensaje(lblMensajeMedios, "Medio de pago agregado", false);
+            mostrarExito(lblMensajeMedios, "Medio de pago agregado");
             cmbTipo.setValue(null);
             txtIdentificador.clear();
             cargarDatos();
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensajeMedios, e.getMessage(), true);
+            mostrarError(lblMensajeMedios, e.getMessage());
         }
     }
 
@@ -108,42 +106,15 @@ public class AjustesAplicacionController extends Pantalla implements Initializab
     void quitarMedioPago(ActionEvent event) {
         MedioPago medio = lstMedios.getSelectionModel().getSelectedItem();
         if (medio == null) {
-            mostrarMensaje(lblMensajeMedios, "Elegí de la lista el medio que querés quitar", true);
+            mostrarError(lblMensajeMedios, "Elegí de la lista el medio que querés quitar");
             return;
         }
         try {
             getControladorUsuarios().quitarMedioPago(Sesion.getDocumento(), medio.getTipo(), medio.getIdentificador());
-            mostrarMensaje(lblMensajeMedios, "Medio de pago quitado", false);
+            mostrarExito(lblMensajeMedios, "Medio de pago quitado");
             cargarDatos();
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensajeMedios, e.getMessage(), true);
+            mostrarError(lblMensajeMedios, e.getMessage());
         }
-    }
-
-    @FXML
-    void volver(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("general/PantallaPrincipal.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void cerrarSesion(ActionEvent event) {
-        Sesion.cerrar();
-        try {
-            Main.mostrarPantalla("usuarios/IniciarSesion.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
-    }
-
-    private void mostrarMensaje(Label etiqueta, String texto, boolean esError) {
-        etiqueta.setText(texto);
-        etiqueta.getStyleClass().removeAll("mensaje-error", "mensaje-exito");
-        etiqueta.getStyleClass().add(esError ? "mensaje-error" : "mensaje-exito");
-        etiqueta.setManaged(true);
-        etiqueta.setVisible(true);
     }
 }

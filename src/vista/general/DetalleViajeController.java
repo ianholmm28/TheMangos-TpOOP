@@ -3,14 +3,12 @@ package vista.general;
 import estaciones.Estacion;
 import excepciones.ReglaNegocioException;
 import excepciones.UsuarioNoEncontradoException;
-import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,15 +16,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 import usuarios.Usuario;
 import vehiculos.Vehiculo;
 import viajes.PuntoRecorrido;
 import viajes.Viaje;
-import vista.Main;
+import vista.Formato;
 import vista.Pantalla;
 import vista.Sesion;
 
@@ -67,21 +64,20 @@ public class DetalleViajeController extends Pantalla implements Initializable {
     @FXML
     private Label lblDistancia;
     @FXML
-    private TableView<PuntoRecorrido> tablaPuntos;
-    @FXML
-    private TableColumn<PuntoRecorrido, String> colNumero;
-    @FXML
-    private TableColumn<PuntoRecorrido, String> colHora;
-    @FXML
-    private TableColumn<PuntoRecorrido, String> colLatitud;
-    @FXML
-    private TableColumn<PuntoRecorrido, String> colLongitud;
+    private ListView<String> lstPuntos;
     @FXML
     private TextField txtLatitud;
     @FXML
     private TextField txtLongitud;
     @FXML
     private Label lblMensajePunto;
+
+    @FXML
+    private TextField txtFalla;
+    @FXML
+    private Button btnReportarFalla;
+    @FXML
+    private Label lblMensajeFalla;
 
     public static void setDestinoElegido(String codigoEstacion) {
         codigoDestinoElegido = codigoEstacion;
@@ -95,7 +91,7 @@ public class DetalleViajeController extends Pantalla implements Initializable {
         cmbDestino.setConverter(new StringConverter<Estacion>() {
             @Override
             public String toString(Estacion estacion) {
-                return estacion == null ? "" : estacion.getCodigo() + " - " + estacion.getDireccion();
+                return Formato.estacion(estacion);
             }
 
             @Override
@@ -104,11 +100,6 @@ public class DetalleViajeController extends Pantalla implements Initializable {
             }
         });
         cmbDestino.valueProperty().addListener((obs, anterior, nueva) -> actualizarLugares());
-
-        colNumero.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(tablaPuntos.getItems().indexOf(c.getValue()) + 1)));
-        colHora.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getHora().format(FORMATO_HORA)));
-        colLatitud.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getLatitud())));
-        colLongitud.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getLongitud())));
 
         cargarDatos();
     }
@@ -129,7 +120,7 @@ public class DetalleViajeController extends Pantalla implements Initializable {
             }
 
             Vehiculo vehiculo = viaje.getVehiculo();
-            lblVehiculo.setText(PantallaViajeController.nombreTipo(vehiculo) + " " + vehiculo.getCodigo());
+            lblVehiculo.setText(Formato.nombreTipo(vehiculo.getTipo()) + " " + vehiculo.getCodigo());
             lblDetalle.setText("Saliste de " + viaje.getOrigen().getCodigo() + " - " + viaje.getOrigen().getDireccion()
                     + "\nInicio: " + viaje.getInicio().format(FORMATO_FECHA));
 
@@ -150,12 +141,19 @@ public class DetalleViajeController extends Pantalla implements Initializable {
 
     private void actualizarLugares() {
         if (viaje != null) {
-            lblLugares.setText(PantallaViajeController.textoLugares(cmbDestino.getValue(), viaje.getVehiculo()));
+            lblLugares.setText(Formato.lugaresLibres(cmbDestino.getValue(), viaje.getVehiculo()));
         }
     }
 
     private void actualizarPuntos() {
-        tablaPuntos.setItems(FXCollections.observableArrayList(viaje.getPuntos()));
+        // Un renglon por punto: "1.  14:10:37  -  Lat -34.6037, Lon -58.3816"
+        lstPuntos.getItems().clear();
+        int numero = 1;
+        for (PuntoRecorrido punto : viaje.getPuntos()) {
+            lstPuntos.getItems().add(numero + ".  " + punto.getHora().format(FORMATO_HORA)
+                    + "  -  Lat " + punto.getLatitud() + ", Lon " + punto.getLongitud());
+            numero++;
+        }
         lblDistancia.setText(String.format("Distancia recorrida: %.2f km", viaje.getDistancia()));
     }
 
@@ -169,9 +167,9 @@ public class DetalleViajeController extends Pantalla implements Initializable {
             txtLatitud.clear();
             txtLongitud.clear();
             actualizarPuntos();
-            mostrarMensaje(lblMensajePunto, "Punto agregado", true);
+            mostrarExito(lblMensajePunto, "Punto agregado");
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensajePunto, e.getMessage(), false);
+            mostrarError(lblMensajePunto, e.getMessage());
         }
     }
 
@@ -188,22 +186,34 @@ public class DetalleViajeController extends Pantalla implements Initializable {
         return valor;
     }
 
+    // CU13: el usuario reporta una falla del vehiculo que esta usando
+    @FXML
+    void reportarFalla(ActionEvent event) {
+        try {
+            getControladorMantenimiento().reportarFalla(viaje.getVehiculo().getCodigo(), txtFalla.getText().trim());
+            mostrarExito(lblMensajeFalla, "Gracias, la falla quedó reportada");
+            txtFalla.clear();
+        } catch (ReglaNegocioException e) {
+            mostrarError(lblMensajeFalla, e.getMessage());
+        }
+    }
+
     @FXML
     void finalizarViaje(ActionEvent event) {
         Estacion destino = cmbDestino.getValue();
         if (destino == null) {
-            mostrarMensaje(lblMensaje, "Elegí la estación donde dejás el vehículo", false);
+            mostrarError(lblMensaje, "Elegí la estación donde dejás el vehículo");
             return;
         }
         try {
             Viaje cerrado = getControladorViajes().devolverVehiculo(Sesion.getDocumento(), destino.getCodigo());
             codigoDestinoElegido = null;
-            mostrarMensaje(lblMensaje, "Viaje finalizado en " + destino.getCodigo()
-                    + ". Importe: " + String.format("$ %,.2f", cerrado.getImporte()), true);
+            mostrarExito(lblMensaje, "Viaje finalizado en " + destino.getCodigo()
+                    + ". Importe: " + String.format("$ %,.2f", cerrado.getImporte()));
             deshabilitarAcciones();
         } catch (ReglaNegocioException e) {
             // Si la estacion esta llena el usuario puede elegir otra
-            mostrarMensaje(lblMensaje, e.getMessage(), false);
+            mostrarError(lblMensaje, e.getMessage());
             actualizarLugares();
         }
     }
@@ -213,10 +223,10 @@ public class DetalleViajeController extends Pantalla implements Initializable {
         try {
             getControladorViajes().cancelarRetiro(Sesion.getDocumento());
             codigoDestinoElegido = null;
-            mostrarMensaje(lblMensaje, "Viaje cancelado, el vehículo volvió a la estación", true);
+            mostrarExito(lblMensaje, "Viaje cancelado, el vehículo volvió a la estación");
             deshabilitarAcciones();
         } catch (ReglaNegocioException e) {
-            mostrarMensaje(lblMensaje, e.getMessage(), false);
+            mostrarError(lblMensaje, e.getMessage());
         }
     }
 
@@ -228,32 +238,7 @@ public class DetalleViajeController extends Pantalla implements Initializable {
         btnDevolver.setDisable(true);
         btnCancelar.setDisable(true);
         btnAgregarPunto.setDisable(true);
-    }
-
-    private void mostrarMensaje(Label label, String texto, boolean exito) {
-        label.setText(texto);
-        label.getStyleClass().removeAll("mensaje-error", "mensaje-exito");
-        label.getStyleClass().add(exito ? "mensaje-exito" : "mensaje-error");
-        label.setManaged(true);
-        label.setVisible(true);
-    }
-
-    @FXML
-    void volver(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("general/PantallaPrincipal.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void cerrarSesion(ActionEvent event) {
-        Sesion.cerrar();
-        try {
-            Main.mostrarPantalla("usuarios/IniciarSesion.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
+        txtFalla.setDisable(true);
+        btnReportarFalla.setDisable(true);
     }
 }

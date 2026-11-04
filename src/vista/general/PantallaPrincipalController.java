@@ -1,25 +1,19 @@
 package vista.general;
 
 import excepciones.UsuarioNoEncontradoException;
-import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ListView;
 import usuarios.Movimiento;
 import usuarios.Usuario;
 import viajes.Viaje;
-import vista.Main;
+import vista.Formato;
 import vista.Pantalla;
 import vista.Sesion;
 
@@ -43,57 +37,27 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
     @FXML
     private Button btnIniciarViaje;
 
+    // Cada lista muestra un texto por renglon
     @FXML
-    private TableView<Viaje> tablaViajes;
+    private ListView<String> lstViajes;
     @FXML
-    private TableColumn<Viaje, String> colViajeFecha;
-    @FXML
-    private TableColumn<Viaje, String> colViajeVehiculo;
-    @FXML
-    private TableColumn<Viaje, String> colViajeMinutos;
-    @FXML
-    private TableColumn<Viaje, String> colViajeImporte;
-
-    @FXML
-    private TableView<Movimiento> tablaMovimientos;
-    @FXML
-    private TableColumn<Movimiento, String> colMovFecha;
-    @FXML
-    private TableColumn<Movimiento, String> colMovConcepto;
-    @FXML
-    private TableColumn<Movimiento, String> colMovTipo;
-    @FXML
-    private TableColumn<Movimiento, String> colMovImporte;
+    private ListView<String> lstMovimientos;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        configurarTablas();
         if (Sesion.hayUsuario()) {
             cargarDatos(Sesion.getDocumento());
         }
     }
 
-    private void configurarTablas() {
-        colViajeFecha.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getInicio().format(FORMATO_FECHA)));
-        colViajeVehiculo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getVehiculo().getCodigo()));
-        colViajeMinutos.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getMinutosCobrables())));
-        colViajeImporte.setCellValueFactory(c -> new SimpleStringProperty(formatearPlata(c.getValue().getImporte())));
-
-        colMovFecha.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getFecha().format(FORMATO_FECHA)));
-        colMovConcepto.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getConcepto()));
-        colMovTipo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTipo().toString()));
-        colMovImporte.setCellValueFactory(c -> new SimpleStringProperty(formatearPlata(c.getValue().getImporte())));
-    }
-
-
     private void cargarDatos(String documento) {
         try {
             Usuario usuario = getControladorUsuarios().buscarUsuario(documento);
             lblBienvenida.setText("Hola, " + usuario.getNombre());
-            lblSaldo.setText(formatearPlata(usuario.getCuenta().getSaldo()));
+            lblSaldo.setText(Formato.plata(usuario.getCuenta().getSaldo()));
 
             // Si hay un viaje en curso se puede ver su detalle, si no se puede iniciar uno nuevo
             Viaje enCurso = usuario.getViajeEnCurso();
@@ -105,63 +69,42 @@ public class PantallaPrincipalController extends Pantalla implements Initializab
                 lblEstadoViaje.setText("Estás viajando con el vehículo " + enCurso.getVehiculo().getCodigo());
             }
 
-            tablaMovimientos.setItems(FXCollections.observableArrayList(
-                    getControladorUsuarios().consultarMovimientos(documento)));
+            // Un renglon por movimiento: "01/11/2026 14:10 - Recarga con TARJETA - $ 5.000,00"
+            lstMovimientos.getItems().clear();
+            for (Movimiento movimiento : getControladorUsuarios().consultarMovimientos(documento)) {
+                lstMovimientos.getItems().add(movimiento.getFecha().format(FORMATO_FECHA) + "  -  "
+                        + movimiento.getConcepto() + "  -  " + Formato.plata(movimiento.getImporte()));
+            }
 
-            List<Viaje> viajesDelUsuario = getControladorViajes().getViajesUsuario(documento);
-            tablaViajes.setItems(FXCollections.observableArrayList(viajesDelUsuario));
+            // Un renglon por viaje: "01/11/2026 14:10 - Vehículo M001 - 12 min - $ 1.460,00"
+            lstViajes.getItems().clear();
+            for (Viaje viaje : getControladorViajes().getViajesUsuario(documento)) {
+                lstViajes.getItems().add(viaje.getInicio().format(FORMATO_FECHA) + "  -  Vehículo "
+                        + viaje.getVehiculo().getCodigo() + "  -  " + viaje.getMinutosCobrables() + " min  -  "
+                        + Formato.plata(viaje.getImporte()));
+            }
         } catch (UsuarioNoEncontradoException e) {
             lblBienvenida.setText("Usuario no encontrado");
         }
     }
 
-    private String formatearPlata(double monto) {
-        return String.format("$ %,.2f", monto);
-    }
-
     @FXML
     void recargarSaldo(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("usuarios/RecargarSaldo.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
+        irA("usuarios/RecargarSaldo.fxml");
     }
 
     @FXML
     void registrarVehiculo(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("general/PantallaViaje.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
+        irA("general/PantallaViaje.fxml");
     }
 
     @FXML
     void verDetalleViaje(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("general/DetalleViaje.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
+        irA("general/DetalleViaje.fxml");
     }
 
     @FXML
     void irAAjustes(ActionEvent event) {
-        try {
-            Main.mostrarPantalla("general/AjustesAplicacion.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void cerrarSesion(ActionEvent event) {
-        Sesion.cerrar();
-        try {
-            Main.mostrarPantalla("usuarios/IniciarSesion.fxml");
-        } catch (IOException e) {
-            System.out.println("No se pudo abrir la pantalla: " + e.getMessage());
-        }
+        irA("general/AjustesAplicacion.fxml");
     }
 }

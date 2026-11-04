@@ -5,8 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -46,6 +45,19 @@
                               <Label fx:id="lblLugares" styleClass="subtitulo" wrapText="true" />
                            </children>
                         </VBox>
+                        <!-- CU13 Reportar falla del vehiculo que se esta usando -->
+                        <VBox spacing="6.0">
+                           <children>
+                              <Label styleClass="campo-label" text="¿El vehículo tiene una falla?" />
+                              <HBox spacing="8.0">
+                                 <children>
+                                    <TextField fx:id="txtFalla" promptText="Ej: El freno no anda bien" HBox.hgrow="ALWAYS" />
+                                    <Button fx:id="btnReportarFalla" mnemonicParsing="false" onAction="#reportarFalla" styleClass="boton-secundario" text="Reportar" />
+                                 </children>
+                              </HBox>
+                              <Label fx:id="lblMensajeFalla" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
+                           </children>
+                        </VBox>
                         <Region VBox.vgrow="ALWAYS" />
                         <Button fx:id="btnDevolver" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#finalizarViaje" styleClass="boton-primario" text="Devolver vehículo" />
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" fx:id="btnCancelar" onAction="#cancelarViaje" styleClass="boton-secundario" text="Cancelar viaje (hasta 2 min)" />
@@ -65,20 +77,11 @@
                               <Label fx:id="lblDistancia" styleClass="subtitulo" text="Distancia recorrida: 0,00 km" />
                            </children>
                         </VBox>
-                        <TableView fx:id="tablaPuntos" VBox.vgrow="ALWAYS">
-                           <columns>
-                              <TableColumn fx:id="colNumero" prefWidth="50.0" text="#" />
-                              <TableColumn fx:id="colHora" prefWidth="140.0" text="Hora" />
-                              <TableColumn fx:id="colLatitud" prefWidth="130.0" text="Latitud" />
-                              <TableColumn fx:id="colLongitud" prefWidth="130.0" text="Longitud" />
-                           </columns>
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
+                        <ListView fx:id="lstPuntos" VBox.vgrow="ALWAYS">
                            <placeholder>
                               <Label styleClass="subtitulo" text="Todavía no agregaste puntos" />
                            </placeholder>
-                        </TableView>
+                        </ListView>
                         <HBox alignment="BOTTOM_LEFT" spacing="12.0">
                            <children>
                               <VBox spacing="6.0" HBox.hgrow="ALWAYS">

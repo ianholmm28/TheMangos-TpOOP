@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="fondo" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.administracion.PanelAdministradorController">
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="header">
+         <children>
+            <Label styleClass="app-nombre" text="TheMangos" />
+            <Label styleClass="subtitulo" text="Panel de administración" />
+            <Region HBox.hgrow="ALWAYS" />
+            <!-- CU20 Gestionar estaciones -->
+            <Button mnemonicParsing="false" onAction="#irAEstaciones" styleClass="boton-secundario" text="Gestionar estaciones" />
+            <Button mnemonicParsing="false" onAction="#cerrarSesion" styleClass="boton-secundario" text="Cerrar sesión" />
+         </children>
+         <padding>
+            <Insets bottom="14.0" left="28.0" right="28.0" top="14.0" />
+         </padding>
+      </HBox>
+   </top>
+   <center>
+      <TabPane tabClosingPolicy="UNAVAILABLE">
+         <tabs>
+            <!-- CU21 Gestionar vehiculos -->
+            <Tab text="Gestionar vehículos">
+               <content>
+                  <VBox spacing="14.0" styleClass="card">
+                     <children>
+                        <Label styleClass="titulo" text="Gestionar vehículos" />
+                        <Label styleClass="subtitulo" text="Todos los vehículos del sistema. Para cargar uno nuevo usá Gestionar estaciones y agregalo a una estación." wrapText="true" />
+                        <ListView fx:id="lstVehiculos" VBox.vgrow="ALWAYS">
+                           <placeholder>
+                              <Label styleClass="subtitulo" text="Todavía no hay vehículos cargados" />
+                           </placeholder>
+                        </ListView>
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#darDeBaja" styleClass="boton-primario" text="Dar de baja el vehículo elegido" />
+                        <Label fx:id="lblMensajeVehiculos" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
+                     </children>
+                     <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <!-- CU22 Gestionar personal -->
+            <Tab text="Gestionar personal">
+               <content>
+                  <VBox spacing="14.0" styleClass="card">
+                     <children>
+                        <Label styleClass="titulo" text="Gestionar personal" />
+                        <Label styleClass="subtitulo" text="Personal registrado y alta de operadores y técnicos" wrapText="true" />
+                        <ListView fx:id="lstPersonal" VBox.vgrow="ALWAYS">
+                           <placeholder>
+                              <Label styleClass="subtitulo" text="No hay personal registrado" />
+                           </placeholder>
+                        </ListView>
+                        <HBox alignment="BOTTOM_LEFT" spacing="12.0">
+                           <children>
+                              <VBox prefWidth="160.0" spacing="6.0">
+                                 <children>
+                                    <Label styleClass="campo-label" text="Rol" />
+                                    <ComboBox fx:id="cmbRol" maxWidth="1.7976931348623157E308" promptText="Elegí el rol" />
+                                 </children>
+                              </VBox>
+                              <VBox prefWidth="120.0" spacing="6.0">
+                                 <children>
+                                    <Label styleClass="campo-label" text="Legajo" />
+                                    <TextField fx:id="txtLegajo" promptText="Ej: 1002" />
+                                 </children>
+                              </VBox>
+                              <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                                 <children>
+                                    <Label styleClass="campo-label" text="Nombre" />
+                                    <TextField fx:id="txtNombre" promptText="Ej: Ana López" />
+                                 </children>
+                              </VBox>
+                              <VBox prefWidth="160.0" spacing="6.0">
+                                 <children>
+                                    <Label styleClass="campo-label" text="Teléfono" />
+                                    <TextField fx:id="txtTelefono" promptText="Ej: 1155554444" />
+                                 </children>
+                              </VBox>
+                              <Button minWidth="130.0" mnemonicParsing="false" onAction="#registrarPersonal" styleClass="boton-primario" text="Registrar" />
+                           </children>
+                        </HBox>
+                        <Label fx:id="lblMensajePersonal" managed="false" maxWidth="1.7976931348623157E308" styleClass="mensaje" visible="false" wrapText="true" />
+                     </children>
+                     <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <!-- CU24 Emitir reportes -->
+            <Tab text="Emitir reportes">
+               <content>
+                  <VBox spacing="14.0" styleClass="card">
+                     <children>
+                        <Label styleClass="titulo" text="Emitir reportes" />
+                        <HBox spacing="12.0">
+                           <children>
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#reporteViajes" styleClass="boton-secundario" text="Viajes por usuario" HBox.hgrow="ALWAYS" />
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#reporteEstaciones" styleClass="boton-secundario" text="Uso por estación" HBox.hgrow="ALWAYS" />
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#reporteFallas" styleClass="boton-secundario" text="Vehículos con más fallas" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </HBox>
+                        <Label fx:id="lblTituloReporte" styleClass="seccion-titulo" text="Resultado" />
+                        <ListView fx:id="lstReporte" VBox.vgrow="ALWAYS">
+                           <placeholder>
+                              <Label styleClass="subtitulo" text="Elegí un reporte para verlo acá" />
+                           </placeholder>
+                        </ListView>
+                     </children>
+                     <padding>
+                        <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+                     </padding>
+                  </VBox>
+               </content>
+            </Tab>
+         </tabs>
+         <padding>
+            <Insets bottom="20.0" left="28.0" right="28.0" top="16.0" />
+         </padding>
+      </TabPane>
+   </center>
+</BorderPane>
