@@ -49,10 +49,6 @@ public class Viaje implements Serializable {
         this.puntos.add(nuevoPunto);
     }
 
-    public void agregarPunto(LocalDateTime hora, double longitud, double latitud){
-        agregarPunto(latitud, longitud, hora);
-    }
-
     public void cerrar(Estacion destino, LocalDateTime fin){
         this.destino = destino;
         this.fin = fin;

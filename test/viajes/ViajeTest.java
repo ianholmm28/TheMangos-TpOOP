@@ -152,9 +152,8 @@ public class ViajeTest {
 
 
     @Test
-    void AgregarPuntoConLaHoraPrimeroGuardaLatitudYLongitudEnSuLugar() {
-        // uso la sobrecarga que recibe (hora, longitud, latitud)
-        viaje.agregarPunto(INICIO, 10.0, 20.0);
+    void AgregarPuntoGuardaLatitudYLongitudEnSuLugar() {
+        viaje.agregarPunto(20.0, 10.0, INICIO);
         PuntoRecorrido punto = viaje.getPuntos().get(0);
         // verifico que no se hayan mezclado la latitud y la longitud
         assertEquals(20.0, punto.getLatitud(), 0.001);
