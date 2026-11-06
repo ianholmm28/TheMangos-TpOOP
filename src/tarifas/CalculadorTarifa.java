@@ -2,6 +2,8 @@ package tarifas;
 
 import enums.TipoVehiculo;
 import excepciones.ReglaNegocioException;
+import reloj.Reloj;
+import reloj.RelojSistema;
 import viajes.Viaje;
 
 import java.time.LocalDate;
@@ -12,10 +14,16 @@ public class CalculadorTarifa {
 
     private List<Tarifa> tarifas;
     private List<Promocion> promociones;
+    private Reloj reloj;
 
     public CalculadorTarifa(){
+        this(new RelojSistema());
+    }
+
+    public CalculadorTarifa(Reloj reloj){
         this.tarifas = new ArrayList<>();
         this.promociones = new ArrayList<>();
+        this.reloj = (reloj != null) ? reloj : new RelojSistema();
     }
 
     public void agregarTarifa(Tarifa tarifa){
@@ -27,7 +35,11 @@ public class CalculadorTarifa {
     }
 
     public double saldoMinimo(TipoVehiculo tipo) throws ReglaNegocioException {
-        Tarifa tarifa = tarifaVigente(tipo, LocalDate.now());
+        return saldoMinimo(tipo, this.reloj.ahora().toLocalDate());
+    }
+
+    public double saldoMinimo(TipoVehiculo tipo, LocalDate fecha) throws ReglaNegocioException {
+        Tarifa tarifa = tarifaVigente(tipo, fecha);
         return tarifa.calcularBase(30);
     }
 

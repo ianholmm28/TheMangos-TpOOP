@@ -175,7 +175,7 @@ public class ViajeTest {
     void AgregarNotaAjusteGuardaLaNotaConSusDatos() {
         viaje.agregarNotaAjuste(INICIO, "Descuento por demora", 500);
         assertEquals(1, viaje.getNotasAjuste().size());
-        NotaAjuste nota = viaje.getNotasAjuste().getFirst();
+        NotaAjuste nota = viaje.getNotasAjuste().get(0);
         assertEquals(INICIO, nota.getFecha());
         assertEquals("Descuento por demora", nota.getMotivo());
         assertEquals(500, nota.getImporte(), 0.001);

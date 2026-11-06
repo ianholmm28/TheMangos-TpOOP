@@ -18,6 +18,7 @@ public class Viaje implements Serializable {
     private EstadoViaje estado;
     private double importe;
     private int minutosBonificados;
+    private LocalDateTime horaIntentoEstacionLlena;
     private Usuario usuario;
     private Vehiculo vehiculo;
     private Estacion origen;
@@ -35,6 +36,7 @@ public class Viaje implements Serializable {
         this.estado = EstadoViaje.EN_CURSO;
         this.importe = 0;
         this.minutosBonificados = 0;
+        this.horaIntentoEstacionLlena = null;
         this.puntos = new ArrayList<>();
         this.notasAjuste = new ArrayList<>();
     }
@@ -53,9 +55,17 @@ public class Viaje implements Serializable {
         this.destino = destino;
         this.fin = fin;
         this.estado = EstadoViaje.CERRADO;
+        if (this.horaIntentoEstacionLlena != null && fin != null) {
+            long segundosDesvio = Math.max(0, Duration.between(this.horaIntentoEstacionLlena, fin).getSeconds());
+            int minutosDesvio = (int) Math.ceil(segundosDesvio / 60.0);
+            this.minutosBonificados = Math.min(10, minutosDesvio);
+        }
     }
 
     public void registrarIntentoEstacionLlena(LocalDateTime hora){
+        if (this.horaIntentoEstacionLlena == null) {
+            this.horaIntentoEstacionLlena = hora;
+        }
         this.minutosBonificados = 10;
     }
 

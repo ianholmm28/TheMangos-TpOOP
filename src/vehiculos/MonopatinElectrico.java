@@ -41,5 +41,13 @@ public class MonopatinElectrico extends Vehiculo implements Electrico {
         }
     }
 
+    @Override
+    public void consumirPorDistancia(double distanciaKm){
+        if (distanciaKm > 0 && this.velocidadMaxima > 0){
+            int porcentajeGastado = (int) Math.ceil((distanciaKm / this.velocidadMaxima) * 100.0);
+            actualizarBateria(this.nivelBateria - porcentajeGastado);
+        }
+    }
+
     public int getVelocidadMaxima(){return velocidadMaxima;}
 }

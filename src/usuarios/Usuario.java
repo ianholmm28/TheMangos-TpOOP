@@ -27,10 +27,14 @@ public class Usuario implements Serializable {
     private boolean yaViajo;
 
     public Usuario(String nombre, String documento, String email) {
+        this(nombre, documento, email, LocalDate.now());
+    }
+
+    public Usuario(String nombre, String documento, String email, LocalDate fechaAlta) {
         this.nombre = nombre;
         this.documento = documento;
         this.email = email;
-        this.fechaAlta = LocalDate.now();
+        this.fechaAlta = (fechaAlta != null) ? fechaAlta : LocalDate.now();
         this.habilitado = true;
         this.cuenta = new Cuenta(0, new ArrayList<Movimiento>());
         this.plan = null;
@@ -93,6 +97,17 @@ public class Usuario implements Serializable {
         this.plan = new PlanMensual(mes);
     }
 
+    public void verificarRenovacionPlan(YearMonth mesActual) {
+        if (this.plan != null && this.plan.isRenovable() && mesActual != null && mesActual.isAfter(this.plan.getMes())) {
+            if (this.cuenta.tieneSaldo(PlanMensual.COSTO_PLAN)) {
+                this.cuenta.debitar(PlanMensual.COSTO_PLAN, "Renovación plan mensual " + mesActual);
+                this.plan = new PlanMensual(mesActual);
+            } else {
+                this.plan = null;
+            }
+        }
+    }
+
     public void darDeBajaPlan() throws ReglaNegocioException {
         if (this.plan == null) {
             throw new ReglaNegocioException("El usuario no tiene un plan activo para dar de baja.");
@@ -101,13 +116,18 @@ public class Usuario implements Serializable {
     }
     
     public void agregarMediosPago(TipoMedioPago tipo, String identificador) {
+        for (MedioPago m : this.mediosPago) {
+            if (m.getTipo() == tipo && m.getIdentificador().equalsIgnoreCase(identificador)) {
+                return;
+            }
+        }
         MedioPago medioPago = new MedioPago(tipo, identificador);
         this.mediosPago.add(medioPago);
     }
 
     public void agregarMedioPago(MedioPago medio) {
         if (medio != null) {
-            this.mediosPago.add(medio);
+            agregarMediosPago(medio.getTipo(), medio.getIdentificador());
         }
     }
 

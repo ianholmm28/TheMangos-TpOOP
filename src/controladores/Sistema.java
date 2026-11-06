@@ -26,10 +26,6 @@ import java.util.Map;
 
 public class Sistema {
 
-    // Tarifa fija, igual para todos los vehiculos
-    public static final double CARGO_DESBLOQUEO = 500;
-    public static final double PRECIO_MINUTO = 80;
-
     private final Reloj reloj;
     private final CalculadorTarifa calculador;
     private final GeneradorReportes generadorReportes;
@@ -43,6 +39,7 @@ public class Sistema {
     private List<Viaje> viajes;
     private List<Traslado> traslados;
     private List<OrdenMantenimiento> ordenes;
+    private List<String> avisosAlerta;
 
     private final ControladorUsuarios controladorUsuarios;
     private final ControladorViajes controladorViajes;
@@ -52,8 +49,12 @@ public class Sistema {
     private final ControladorPersistencia controladorPersistencia;
 
     public Sistema() {
-        this.reloj = new RelojSistema();
-        this.calculador = new CalculadorTarifa();
+        this(new RelojSistema());
+    }
+
+    public Sistema(Reloj reloj) {
+        this.reloj = (reloj != null) ? reloj : new RelojSistema();
+        this.calculador = new CalculadorTarifa(this.reloj);
         this.calculador.agregarPromocion(new tarifas.PromocionPrimerViaje());
         this.calculador.agregarPromocion(new tarifas.PromocionPlanMensual());
 
@@ -66,35 +67,41 @@ public class Sistema {
         this.viajes = new ArrayList<>();
         this.traslados = new ArrayList<>();
         this.ordenes = new ArrayList<>();
+        this.avisosAlerta = new ArrayList<>();
 
         this.controladorPersistencia = new ControladorPersistencia(usuarios, estaciones, vehiculos, personal, tecnicos, operadores, viajes, traslados, ordenes, calculador);
         this.controladorPersistencia.cargarDatos();
 
-        this.controladorUsuarios = new ControladorUsuarios(usuarios, calculador);
-        this.controladorViajes = new ControladorViajes(usuarios, estaciones, viajes, calculador, reloj);
-        this.controladorEstaciones = new ControladorEstaciones(estaciones, operadores, traslados, reloj);
-        this.controladorMantenimiento = new ControladorMantenimiento(vehiculos, tecnicos, ordenes, reloj);
-        this.controladorAdministracion = new ControladorAdministracion(vehiculos, estaciones, personal, tecnicos, operadores, calculador);
+        this.controladorUsuarios = new ControladorUsuarios(usuarios, calculador, this.reloj);
+        this.controladorViajes = new ControladorViajes(usuarios, estaciones, viajes, avisosAlerta, calculador, this.reloj);
+        this.controladorEstaciones = new ControladorEstaciones(estaciones, operadores, traslados, avisosAlerta, this.reloj);
+        this.controladorMantenimiento = new ControladorMantenimiento(vehiculos, tecnicos, ordenes, this.reloj);
+        this.controladorAdministracion = new ControladorAdministracion(vehiculos, estaciones, personal, tecnicos, operadores, ordenes, calculador, this.reloj);
         this.generadorReportes = new GeneradorReportes(viajes, vehiculos, estaciones);
 
-        cargarTarifaFija();
+        cargarTarifasIniciales();
         cargarPersonalInicial();
 
         this.controladorViajes.controlarViajesVencidos();
     }
 
-    // Carga la tarifa fija para cada tipo de vehiculo si todavia no tiene una
-    private void cargarTarifaFija() {
-        for (TipoVehiculo tipo : TipoVehiculo.values()) {
-            boolean tieneTarifa = false;
-            for (Tarifa tarifa : calculador.getTarifas()) {
-                if (tarifa.getTipo() == tipo) {
-                    tieneTarifa = true;
-                }
+    private void cargarTarifasIniciales() {
+        cargarTarifaBase(TipoVehiculo.BICICLETA_COMUN, 200, 20);
+        cargarTarifaBase(TipoVehiculo.BICICLETA_ELECTRICA, 300, 45);
+        cargarTarifaBase(TipoVehiculo.MONOPATIN_ELECTRICO, 300, 50);
+    }
+
+    private void cargarTarifaBase(TipoVehiculo tipo, double desbloqueo, double precioMinuto) {
+        LocalDate fechaBase = LocalDate.of(2000, 1, 1);
+        boolean tieneTarifa = false;
+        for (Tarifa tarifa : calculador.getTarifas()) {
+            if (tarifa.getTipo() == tipo) {
+                tieneTarifa = true;
+                break;
             }
-            if (!tieneTarifa) {
-                calculador.agregarTarifa(new Tarifa(tipo, LocalDate.of(2000, 1, 1), CARGO_DESBLOQUEO, PRECIO_MINUTO));
-            }
+        }
+        if (!tieneTarifa) {
+            calculador.agregarTarifa(new Tarifa(tipo, fechaBase, desbloqueo, precioMinuto));
         }
     }
 

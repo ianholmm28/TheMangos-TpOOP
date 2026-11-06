@@ -22,7 +22,7 @@ public class CuentaTest {
             // verifico que se haya aniadido un movimiento a la cuenta
             assertEquals(1, cuenta.getMovimientos().size());
             //verifico que el movimiento que se registro sea el correcto
-            assertEquals(TipoMovimiento.RECARGA, cuenta.getMovimientos().getFirst().getTipo());
+            assertEquals(TipoMovimiento.RECARGA, cuenta.getMovimientos().get(0).getTipo());
         }
 
         @Test

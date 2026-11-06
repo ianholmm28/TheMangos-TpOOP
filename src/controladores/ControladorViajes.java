@@ -13,6 +13,7 @@ import vehiculos.Vehiculo;
 import viajes.Viaje;
 
 import java.time.Duration;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,21 +23,23 @@ public class ControladorViajes {
     private Map<String, Usuario> usuarios;
     private Map<String, Estacion> estaciones;
     private List<Viaje> viajes;
+    private List<String> avisosAlerta;
     private CalculadorTarifa calculador;
     private Reloj reloj;
 
     public ControladorViajes(CalculadorTarifa calculador, Reloj reloj) {
-        this.usuarios = new HashMap<>();
-        this.estaciones = new HashMap<>();
-        this.viajes = new ArrayList<>();
-        this.calculador = calculador;
-        this.reloj = reloj;
+        this(new HashMap<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), calculador, reloj);
     }
 
     public ControladorViajes(Map<String, Usuario> usuarios, Map<String, Estacion> estaciones, List<Viaje> viajes, CalculadorTarifa calculador, Reloj reloj) {
+        this(usuarios, estaciones, viajes, new ArrayList<>(), calculador, reloj);
+    }
+
+    public ControladorViajes(Map<String, Usuario> usuarios, Map<String, Estacion> estaciones, List<Viaje> viajes, List<String> avisosAlerta, CalculadorTarifa calculador, Reloj reloj) {
         this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
         this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
         this.viajes = (viajes != null) ? viajes : new ArrayList<>();
+        this.avisosAlerta = (avisosAlerta != null) ? avisosAlerta : new ArrayList<>();
         this.calculador = calculador;
         this.reloj = reloj;
     }
@@ -49,11 +52,16 @@ public class ControladorViajes {
         if (vehiculo == null || !vehiculo.estaDisponible()) {
             throw new VehiculoNoDisponibleException("El vehículo no está disponible en la estación: " +codVehiculo);
         }
-        double saldoRequerido = this.calculador.saldoMinimo(vehiculo.getTipo());
+        usuario.verificarRenovacionPlan(YearMonth.from(this.reloj.ahora()));
+        double saldoRequerido = this.calculador.saldoMinimo(vehiculo.getTipo(), this.reloj.ahora().toLocalDate());
         usuario.verificarHabilitacion(saldoRequerido);
 
         estacion.entregar(codVehiculo);
         vehiculo.setEstado(EstadoVehiculo.EN_USO);
+
+        if (estacion.necesitaRedistribucion()) {
+            generarAlerta(estacion);
+        }
 
         Viaje nuevoViaje = new Viaje(usuario, vehiculo, estacion, this.reloj.ahora());
         nuevoViaje.agregarPunto(estacion.getLatitud(), estacion.getLongitud(), this.reloj.ahora());
@@ -77,8 +85,17 @@ public class ControladorViajes {
 
         viaje.setEstado(EstadoViaje.CANCELADO);
         Vehiculo vehiculo = viaje.getVehiculo();
-        vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        if (vehiculo.getEstado() == EstadoVehiculo.EN_REPARACION || vehiculo.fallasUltimos30Dias(this.reloj.ahora()) >= 3) {
+            vehiculo.enviarAReparacion();
+        } else if (vehiculo instanceof Electrico electrico && electrico.getNivelBateria() < 15) {
+            vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
+        } else {
+            vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        }
         viaje.getOrigen().recibir(vehiculo);
+        if (viaje.getOrigen().necesitaRedistribucion()) {
+            generarAlerta(viaje.getOrigen());
+        }
         usuario.cancelarViaje();
     }
 
@@ -118,26 +135,27 @@ public class ControladorViajes {
             if (nivelBateria >= 0) {
                 electrico.actualizarBateria(nivelBateria);
             } else {
-                double autonomiaKm = (vehiculo instanceof vehiculos.BicicletaElectrica bici) ? bici.getAutonomia() : 25.0;
-                int porcentajeGastado = (int) Math.ceil((viaje.getDistancia() / autonomiaKm) * 100.0);
-                int nuevaBateria = Math.max(0, electrico.getNivelBateria() - porcentajeGastado);
-                electrico.actualizarBateria(nuevaBateria);
+                electrico.consumirPorDistancia(viaje.getDistancia());
             }
         }
 
-        if (vehiculo.getEstado() != EstadoVehiculo.EN_REPARACION) {
-            if (vehiculo instanceof Electrico && ((Electrico) vehiculo).getNivelBateria() < 15) {
-                vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
-            } else {
-                vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
-            }
+        if (vehiculo.getEstado() == EstadoVehiculo.EN_REPARACION || vehiculo.fallasUltimos30Dias(this.reloj.ahora()) >= 3) {
+            vehiculo.enviarAReparacion();
+        } else if (vehiculo instanceof Electrico && ((Electrico) vehiculo).getNivelBateria() < 15) {
+            vehiculo.setEstado(EstadoVehiculo.BATERIA_BAJA);
+        } else {
+            vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        }
+
+        if (destino.necesitaRedistribucion()) {
+            generarAlerta(destino);
         }
 
         vehiculo.agregarKm(viaje.getDistancia());
 
         double importe = this.calculador.calcular(viaje);
         viaje.setImporte(importe);
-        usuario.getCuenta().debitar(importe, "Cierre de viaje #" + this.viajes.indexOf(viaje));
+        usuario.getCuenta().debitar(importe, "Cierre de viaje #" + this.viajes.indexOf(viaje), this.reloj.ahora());
 
         if (usuario.getCuenta().getSaldo() < 0) {
             usuario.inhabilitar();
@@ -153,15 +171,26 @@ public class ControladorViajes {
         if (viaje.getEstado() != EstadoViaje.CERRADO) {
             throw new ReglaNegocioException("Solo se pueden aplicar notas de ajuste a viajes cerrados.");
         }
+        if (motivo == null || motivo.trim().isEmpty()) {
+            throw new ReglaNegocioException("El motivo de la nota de ajuste no puede estar vacío.");
+        }
+        if (importe == 0) {
+            throw new ReglaNegocioException("El importe de la nota de ajuste no puede ser cero.");
+        }
 
         viaje.agregarNotaAjuste(this.reloj.ahora(), motivo, importe);
-        viaje.getUsuario().getCuenta().ajustar(importe, "Nota de ajuste: " + motivo);
+        viaje.getUsuario().getCuenta().ajustar(importe, "Nota de ajuste: " + motivo, this.reloj.ahora());
 
         if (viaje.getUsuario().getCuenta().getSaldo() >= 0) {
             viaje.getUsuario().rehabilitar();
         } else {
             viaje.getUsuario().inhabilitar();
         }
+    }
+
+    private void generarAlerta(Estacion estacion) {
+        double porcentaje = estacion.getOcupacion() * 100;
+        this.avisosAlerta.add("Alerta. La estación " + estacion.getCodigo() + " se encuentra al " + porcentaje + "% de ocupación.");
     }
 
     public List<Viaje> controlarViajesVencidos() {

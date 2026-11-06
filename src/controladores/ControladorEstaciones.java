@@ -32,19 +32,32 @@ public class ControladorEstaciones {
     }
 
     public ControladorEstaciones(Map<String, Estacion> estaciones, Map<String, Operador> operadores, List<Traslado> traslados, Reloj reloj) {
+        this(estaciones, operadores, traslados, new ArrayList<>(), reloj);
+    }
+
+    public ControladorEstaciones(Map<String, Estacion> estaciones, Map<String, Operador> operadores, List<Traslado> traslados, List<String> avisosAlerta, Reloj reloj) {
         this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
         this.operadores = (operadores != null) ? operadores : new HashMap<>();
         this.traslados = (traslados != null) ? traslados : new ArrayList<>();
-        this.avisosAlerta = new ArrayList<>();
+        this.avisosAlerta = (avisosAlerta != null) ? avisosAlerta : new ArrayList<>();
         this.reloj = reloj;
     }
 
     public Estacion registrarEstacion(String codigo, String direccion, double latitud, double longitud, Map<TipoVehiculo, Integer> capacidades) throws ReglaNegocioException{
+        if (codigo == null || codigo.trim().isEmpty() || direccion == null || direccion.trim().isEmpty()) {
+            throw new ReglaNegocioException("El código y la dirección de la estación son obligatorios.");
+        }
+        if (latitud < -90 || latitud > 90 || longitud < -180 || longitud > 180) {
+            throw new ReglaNegocioException("Las coordenadas ingresadas están fuera de rango válido.");
+        }
+        if (capacidades == null || capacidades.isEmpty()) {
+            throw new ReglaNegocioException("Debe especificar las capacidades de la estación.");
+        }
         if (this.estaciones.containsKey(codigo)){
             throw new ReglaNegocioException("Ya existe una estación con el código: "+codigo);
         }
         for (Integer capacidad : capacidades.values()){
-            if (capacidad <= 0){
+            if (capacidad == null || capacidad <= 0){
                 throw new ReglaNegocioException("La capacidad para cada vehículo debe ser mayor a cero.");
             }
         }
@@ -56,13 +69,24 @@ public class ControladorEstaciones {
 
     public void modificarEstacion(String codigo, String nuevaDireccion, double nuevaLatitud, double nuevaLongitud, Map<TipoVehiculo, Integer> nuevasCapacidades) throws ReglaNegocioException {
         Estacion estacion = buscarEstacion(codigo);
+        if (nuevaDireccion == null || nuevaDireccion.trim().isEmpty()) {
+            throw new ReglaNegocioException("La dirección de la estación no puede estar vacía.");
+        }
+        if (nuevaLatitud < -90 || nuevaLatitud > 90 || nuevaLongitud < -180 || nuevaLongitud > 180) {
+            throw new ReglaNegocioException("Las coordenadas ingresadas están fuera de rango válido.");
+        }
+        if (nuevasCapacidades == null || nuevasCapacidades.isEmpty()) {
+            throw new ReglaNegocioException("Debe especificar las nuevas capacidades de la estación.");
+        }
         for (Map.Entry<TipoVehiculo, Integer> entrada : nuevasCapacidades.entrySet()) {
-            TipoVehiculo tipo = entrada.getKey();
-            int capacidad = entrada.getValue();
-            if (capacidad <= 0) {
+            Integer capacidad = entrada.getValue();
+            if (capacidad == null || capacidad <= 0) {
                 throw new ReglaNegocioException("La capacidad para cada vehículo debe ser mayor a cero.");
             }
-            if (capacidad < estacion.cantidadVehiculosPorTipo(tipo)) {
+        }
+        for (TipoVehiculo tipo : TipoVehiculo.values()) {
+            int nuevaCapacidad = nuevasCapacidades.getOrDefault(tipo, 0);
+            if (nuevaCapacidad < estacion.cantidadVehiculosPorTipo(tipo)) {
                 throw new ReglaNegocioException("La nueva capacidad no puede ser menor a los vehículos presentes para " + tipo);
             }
         }
@@ -87,6 +111,9 @@ public class ControladorEstaciones {
             Vehiculo vehiculo = origen.buscarVehiculo(codigo);
             if (vehiculo == null || vehiculo.getEstado() == EstadoVehiculo.EN_USO){
                 throw new VehiculoNoDisponibleException("El vehículo " + codigo + " no está en origen o se encuentra en uso");
+            }
+            if (aTrasladar.contains(vehiculo)) {
+                throw new ReglaNegocioException("El vehículo " + codigo + " está repetido en la lista de traslado.");
             }
             aTrasladar.add(vehiculo);
         }

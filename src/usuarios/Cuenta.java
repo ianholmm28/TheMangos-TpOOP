@@ -15,8 +15,12 @@ public class Cuenta implements Serializable {
         this.movimientos = movimientos;
     }
     
-    public void recargar(double monto,String concepto){
-       Movimiento movimiento = new Movimiento(LocalDateTime.now(),monto,TipoMovimiento.RECARGA,concepto);
+    public void recargar(double monto, String concepto){
+       recargar(monto, concepto, LocalDateTime.now());
+    }
+
+    public void recargar(double monto, String concepto, LocalDateTime fecha){
+       Movimiento movimiento = new Movimiento(fecha != null ? fecha : LocalDateTime.now(), monto, TipoMovimiento.RECARGA, concepto);
        this.saldo += monto;
        this.movimientos.add(movimiento);  
     }
@@ -26,14 +30,22 @@ public class Cuenta implements Serializable {
        recargar(monto, detalle);
     }
     
-    public void debitar(double monto,String concepto){
-       Movimiento movimiento = new Movimiento(LocalDateTime.now(),monto,TipoMovimiento.DEBITO,concepto);
+    public void debitar(double monto, String concepto){
+       debitar(monto, concepto, LocalDateTime.now());
+    }
+
+    public void debitar(double monto, String concepto, LocalDateTime fecha){
+       Movimiento movimiento = new Movimiento(fecha != null ? fecha : LocalDateTime.now(), monto, TipoMovimiento.DEBITO, concepto);
        this.saldo -= monto;
        this.movimientos.add(movimiento);
     }
 
     public void ajustar(double monto, String concepto){
-       Movimiento movimiento = new Movimiento(LocalDateTime.now(), Math.abs(monto), TipoMovimiento.AJUSTE, concepto);
+       ajustar(monto, concepto, LocalDateTime.now());
+    }
+
+    public void ajustar(double monto, String concepto, LocalDateTime fecha){
+       Movimiento movimiento = new Movimiento(fecha != null ? fecha : LocalDateTime.now(), monto, TipoMovimiento.AJUSTE, concepto);
        this.saldo += monto;
        this.movimientos.add(movimiento);
     }

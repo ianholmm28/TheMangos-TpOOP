@@ -1,4 +1,6 @@
 /nbproject/private/
 /build/
 /dist/
+/out/
+/.idea/
 *.dat

@@ -30,6 +30,14 @@ public class BicicletaElectrica extends Vehiculo implements Electrico {
     }
 
     @Override
+    public void consumirPorDistancia(double distanciaKm){
+        if (distanciaKm > 0 && this.autonomia > 0){
+            int porcentajeGastado = (int) Math.ceil((distanciaKm / this.autonomia) * 100.0);
+            actualizarBateria(this.nivelBateria - porcentajeGastado);
+        }
+    }
+
+    @Override
     public TipoVehiculo getTipo(){return TipoVehiculo.BICICLETA_ELECTRICA;}
 
     @Override

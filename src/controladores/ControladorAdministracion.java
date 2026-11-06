@@ -9,6 +9,8 @@ import excepciones.VehiculoNoEncontradoException;
 import personal.Operador;
 import personal.Personal;
 import personal.Tecnico;
+import reloj.Reloj;
+import reloj.RelojSistema;
 import tarifas.CalculadorTarifa;
 import tarifas.Promocion;
 import tarifas.Tarifa;
@@ -16,10 +18,13 @@ import vehiculos.BicicletaComun;
 import vehiculos.BicicletaElectrica;
 import vehiculos.Electrico;
 import vehiculos.MonopatinElectrico;
+import vehiculos.OrdenMantenimiento;
 import vehiculos.Vehiculo;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ControladorAdministracion {
@@ -28,31 +33,37 @@ public class ControladorAdministracion {
     private Map<String, Personal> personal;
     private Map<String, Tecnico> tecnicos;
     private Map<String, Operador> operadores;
+    private List<OrdenMantenimiento> ordenes;
     private CalculadorTarifa calculador;
+    private Reloj reloj;
 
     public ControladorAdministracion(CalculadorTarifa calculador) {
-        this.vehiculos = new HashMap<>();
-        this.estaciones = new HashMap<>();
-        this.personal = new HashMap<>();
-        this.tecnicos = new HashMap<>();
-        this.operadores = new HashMap<>();
-        this.calculador = calculador;
+        this(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new ArrayList<>(), calculador, new RelojSistema());
     }
 
     public ControladorAdministracion(Map<String, Vehiculo> vehiculos, Map<String, Estacion> estaciones, Map<String, Personal> personal, CalculadorTarifa calculador) {
-        this(vehiculos, estaciones, personal, new HashMap<>(), new HashMap<>(), calculador);
+        this(vehiculos, estaciones, personal, new HashMap<>(), new HashMap<>(), new ArrayList<>(), calculador, new RelojSistema());
     }
 
     public ControladorAdministracion(Map<String, Vehiculo> vehiculos, Map<String, Estacion> estaciones, Map<String, Personal> personal, Map<String, Tecnico> tecnicos, Map<String, Operador> operadores, CalculadorTarifa calculador) {
+        this(vehiculos, estaciones, personal, tecnicos, operadores, new ArrayList<>(), calculador, new RelojSistema());
+    }
+
+    public ControladorAdministracion(Map<String, Vehiculo> vehiculos, Map<String, Estacion> estaciones, Map<String, Personal> personal, Map<String, Tecnico> tecnicos, Map<String, Operador> operadores, List<OrdenMantenimiento> ordenes, CalculadorTarifa calculador, Reloj reloj) {
         this.vehiculos = (vehiculos != null) ? vehiculos : new HashMap<>();
         this.estaciones = (estaciones != null) ? estaciones : new HashMap<>();
         this.personal = (personal != null) ? personal : new HashMap<>();
         this.tecnicos = (tecnicos != null) ? tecnicos : new HashMap<>();
         this.operadores = (operadores != null) ? operadores : new HashMap<>();
+        this.ordenes = (ordenes != null) ? ordenes : new ArrayList<>();
         this.calculador = calculador;
+        this.reloj = (reloj != null) ? reloj : new RelojSistema();
     }
 
     public Vehiculo altaVehiculo(TipoVehiculo tipo, String codigo, Map<String, Object> datos, String codEstacion) throws ReglaNegocioException {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            throw new ReglaNegocioException("El código del vehículo no puede estar vacío.");
+        }
         if (this.vehiculos.containsKey(codigo)) {
             throw new ReglaNegocioException("Ya existe un vehículo con el código: " + codigo);
         }
@@ -67,28 +78,29 @@ public class ControladorAdministracion {
         }
 
         Vehiculo nuevo;
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = this.reloj.ahora().toLocalDate();
 
         if (datos == null) {
             datos = new HashMap<>();
         }
 
         switch (tipo) {
-            case BICICLETA_COMUN -> {
+            case BICICLETA_COMUN:
                 int rodado = (int) datos.getOrDefault("rodado", 26);
                 nuevo = new BicicletaComun(codigo, rodado, hoy);
-            }
-            case BICICLETA_ELECTRICA -> {
+                break;
+            case BICICLETA_ELECTRICA:
                 int autonomia = (int) datos.getOrDefault("autonomia", 40);
-                int bateria = (int) datos.getOrDefault("bateria", 100);
-                nuevo = new BicicletaElectrica(codigo, autonomia, bateria, hoy);
-            }
-            case MONOPATIN_ELECTRICO -> {
+                int bateriaBici = (int) datos.getOrDefault("bateria", 100);
+                nuevo = new BicicletaElectrica(codigo, autonomia, bateriaBici, hoy);
+                break;
+            case MONOPATIN_ELECTRICO:
                 int velMax = (int) datos.getOrDefault("velocidadMaxima", 25);
-                int bateria = (int) datos.getOrDefault("bateria", 100);
-                nuevo = new MonopatinElectrico(codigo, velMax, bateria, hoy);
-            }
-            default -> throw new ReglaNegocioException("Tipo de vehículo no reconocido: " + tipo);
+                int bateriaMono = (int) datos.getOrDefault("bateria", 100);
+                nuevo = new MonopatinElectrico(codigo, velMax, bateriaMono, hoy);
+                break;
+            default:
+                throw new ReglaNegocioException("Tipo de vehículo no reconocido: " + tipo);
         }
 
         if (nuevo instanceof Electrico && ((Electrico) nuevo).getNivelBateria() < 15) {
@@ -107,6 +119,11 @@ public class ControladorAdministracion {
         }
         if (v.getEstado() == EstadoVehiculo.EN_USO) {
             throw new ReglaNegocioException("No se puede dar de baja el vehículo " + codigo + " porque se encuentra en uso.");
+        }
+        for (OrdenMantenimiento orden : this.ordenes) {
+            if (orden.getVehiculo().getCodigo().equals(codigo) && orden.estaAbierta()) {
+                throw new ReglaNegocioException("No se puede dar de baja el vehículo " + codigo + " porque tiene una orden de mantenimiento abierta.");
+            }
         }
         v.setEstado(EstadoVehiculo.FUERA_DE_SERVICIO);
         for (Estacion e : this.estaciones.values()) {

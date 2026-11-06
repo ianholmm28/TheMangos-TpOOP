@@ -23,9 +23,13 @@ public class Main extends Application {
     public static void mostrarPantalla(String rutaFxml) throws IOException {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource(rutaFxml));
         Parent root = loader.load();
-        Scene scene = new Scene(root);
-       scene.getStylesheets().add(Main.class.getResource("estilos.css").toExternalForm());
-        stage.setScene(scene);
+        if (stage.getScene() == null) {
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(Main.class.getResource("estilos.css").toExternalForm());
+            stage.setScene(scene);
+        } else {
+            stage.getScene().setRoot(root);
+        }
     }
 
     @Override

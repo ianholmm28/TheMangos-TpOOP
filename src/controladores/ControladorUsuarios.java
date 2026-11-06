@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import reloj.Reloj;
+import reloj.RelojSistema;
 import tarifas.CalculadorTarifa;
 import usuarios.Movimiento;
 
@@ -17,10 +19,16 @@ public class ControladorUsuarios {
 
     private Map<String, Usuario> usuarios;
     private CalculadorTarifa calculador;
+    private Reloj reloj;
 
     public ControladorUsuarios(Map<String, Usuario> usuarios, CalculadorTarifa calculador) {
+        this(usuarios, calculador, new RelojSistema());
+    }
+
+    public ControladorUsuarios(Map<String, Usuario> usuarios, CalculadorTarifa calculador, Reloj reloj) {
         this.usuarios = (usuarios != null) ? usuarios : new HashMap<>();
         this.calculador = calculador;
+        this.reloj = (reloj != null) ? reloj : new RelojSistema();
     }      
     
     public Usuario registrarUsuario(String nombre, String documento, String email) throws ReglaNegocioException{
@@ -29,11 +37,16 @@ public class ControladorUsuarios {
             email == null || email.trim().isEmpty()) {
             throw new ReglaNegocioException("Los datos del usuario (nombre, documento, email) no pueden ser vacíos.");
         }
-        if (!documento.matches("\\d+")) {
-            throw new ReglaNegocioException("El documento debe contener únicamente números.");
+        for (int i = 0; i < documento.length(); i++) {
+            if (!Character.isDigit(documento.charAt(i))) {
+                throw new ReglaNegocioException("El documento debe contener únicamente números.");
+            }
         }
-        if (!nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")){
-            throw new ReglaNegocioException("El nombre solo puede contener letras y espacios.");
+        for (int i = 0; i < nombre.length(); i++) {
+            char c = nombre.charAt(i);
+            if (!Character.isLetter(c) && c != ' ') {
+                throw new ReglaNegocioException("El nombre solo puede contener letras y espacios.");
+            }
         }
         if (!email.contains("@")){
             throw new ReglaNegocioException("El email ingresado no tiene un formato válido.");
@@ -41,7 +54,7 @@ public class ControladorUsuarios {
         if (usuarios.containsKey(documento)) {
             throw new ReglaNegocioException("Ya existe un usuario con ese documento");
         }
-        Usuario usuarioNuevo = new Usuario(nombre, documento, email);
+        Usuario usuarioNuevo = new Usuario(nombre, documento, email, this.reloj.ahora().toLocalDate());
         usuarios.put(documento, usuarioNuevo);
         return usuarioNuevo;
     }
@@ -58,8 +71,15 @@ public class ControladorUsuarios {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ReglaNegocioException("El nombre no puede estar vacío.");
         }
+        String nombreLimpio = nombre.trim();
+        for (int i = 0; i < nombreLimpio.length(); i++) {
+            char c = nombreLimpio.charAt(i);
+            if (!Character.isLetter(c) && c != ' ') {
+                throw new ReglaNegocioException("El nombre solo puede contener letras y espacios.");
+            }
+        }
         Usuario usuario = buscarUsuario(documento);
-        usuario.cambiarNombre(nombre.trim());
+        usuario.cambiarNombre(nombreLimpio);
     }
 
     public void agregarMedioPago(String documento, usuarios.MedioPago medio) throws ReglaNegocioException {
@@ -91,7 +111,7 @@ public class ControladorUsuarios {
         
     public void suscribirPlan(String documento) throws ReglaNegocioException {
         Usuario usuario = buscarUsuario(documento);
-        usuario.suscribirPlan(YearMonth.now());
+        usuario.suscribirPlan(YearMonth.from(this.reloj.ahora()));
     }
 
     public void darDeBajaPlan(String documento) throws ReglaNegocioException {

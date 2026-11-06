@@ -8,7 +8,6 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -98,11 +97,5 @@ public class RecargarSaldoController extends Pantalla implements Initializable {
         } catch (ReglaNegocioException e) {
             mostrarError(lblMensaje, e.getMessage());
         }
-    }
-
-    // Botones de monto rapido: el valor esta en el userData del boton
-    @FXML
-    void montoRapido(ActionEvent event) {
-        txtMonto.setText(((Node) event.getSource()).getUserData().toString());
     }
 }
