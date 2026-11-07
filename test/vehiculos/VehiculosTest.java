@@ -33,6 +33,8 @@ public class VehiculosTest {
     void CrearVehiculo(){
         vehiculo = new BicicletaElectrica("1111",67,67,LocalDate.now());
     }
+
+
     @Test
     void ActualizarLaBateriaYVerAQueEstado() {
         //verifico que el vehiculo esta disponible
@@ -42,6 +44,8 @@ public class VehiculosTest {
         // verifico que cambio a bateria baja
         assertEquals(BATERIA_BAJA, vehiculo.getEstado());
     }
+
+
     @Test
     void ActualizarLaBateriaYDisponible() {
         // actualizo la bateria 14 %
